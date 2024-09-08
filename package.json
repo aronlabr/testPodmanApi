@@ -16,11 +16,15 @@
       {
         "command": "wslite.hello",
         "title": "My First Extension: Hello World"
+      },
+      {
+        "command": "wslite.hello2",
+        "title": "My First Extension: Hello World2"
       }
     ]
   },
   "scripts": {
-    "publish": "MODE='producciton' vite build",
+    "publish": "MODE='production' vite build",
     "build": "vite build",
     "test": "vitest run --coverage",
     "test:watch": "vitest watch --coverage",

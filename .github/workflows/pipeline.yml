@@ -13,6 +13,7 @@ jobs:
         with:
           node-version: "22"
       - uses: actions/cache@v4
+        id: cache-node
         with:
           path: node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -32,7 +33,9 @@ jobs:
           key: ${{ runner.os }}-buildx
           restore-keys: |
             ${{ runner.os }}-buildx-
-      - run: npm i && npm run build
+      - run: npm i
+        if: steps.cache-node.outputs.cache-hit != 'true'
+      - run: npm run publish
       - uses: docker/build-push-action@v6.7.0
         env:
           DOCKER_BUILD_RECORD_UPLOAD: false

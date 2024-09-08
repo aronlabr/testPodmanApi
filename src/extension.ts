@@ -27,11 +27,11 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
   // initTelemetryLogger();
   // await getDistros();
 
-  let testInput = await extensionApi.window.showInputBox({
-    title: "Hello",
-    markdownDescription: "Hola extension",
-    valueSelection: [1, 2]
-  });
+  // let testInput = await extensionApi.window.showInputBox({
+  //   title: "Hello",
+  //   markdownDescription: "Hola extension",
+  //   valueSelection: [1, 2]
+  // });
   // extensionApi.commands.registerCommand(`${extInfo.id}.once`, testInput)
   // Create a provider with an example name, ID and icon
   const provider = extensionApi.provider.createProvider(extInfo);
@@ -49,7 +49,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
   // it will stick on the left of the status bar
   const item = extensionApi.window.createStatusBarItem(extensionApi.StatusBarAlignLeft, 100);
   item.text = 'My first command';
-  item.command = `${extInfo.id}.hello`;
+  item.command = `${extInfo.id}.hello2`;
   item.show();
 
   extensionContext.subscriptions.push(
