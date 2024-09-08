@@ -9,7 +9,7 @@ import { GitHubReleases } from './github-releases';
 const extInfo: extensionApi.ProviderOptions = {
   name: 'WSL integration lite',
   id: 'wslite',
-  status: 'unknown',
+  status: 'installed',
   images: {
     icon: './icon.png',
   },
@@ -51,12 +51,12 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
   item.text = 'My first command';
   item.command = `${extInfo.id}.hello2`;
   item.show();
-
-  // Push the new provider to Podman Desktop
-  // extensionContext.subscriptions.push(provider);
-
+  
   extensionContext.subscriptions.push(myFirstCommand);
   extensionContext.subscriptions.push(item);
+
+  // Push the new provider to Podman Desktop
+  extensionContext.subscriptions.push(provider);
 
 }
 
