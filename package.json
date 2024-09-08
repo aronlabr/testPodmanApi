@@ -1,0 +1,29 @@
+{
+  "name": "wsl-lite-int",
+  "displayName": "WSL Integration Lite",
+  "description": "Set up WSL with Podman and Docker Compose for remote Podman connections.",
+  "version": "0.0.1-next",
+  "icon": "icon.png",
+  "publisher": "brizio",
+  "license": "MIT",
+  "engines": {
+    "podman-desktop": "latest"
+  },
+  "type": "module",
+  "scripts": {
+    "publish": "MODE='producciton' vite build",
+    "build": "vite build",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest watch --coverage",
+    "watch": "vite build --watch"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "@octokit/rest": "^21.0.2",
+    "@podman-desktop/api": "^1.12.0",
+    "@types/node": "^22.5.4",
+    "shell-path": "^3.0.0",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.3"
+  }
+}

@@ -1,0 +1,35 @@
+import { exec } from "child_process";
+
+
+// Run the WSL command to list distributions with verbose info
+export async function getDistros(): Promise<void> {
+  exec('wsl.exe -l -v', (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error executing command: ${error.message}`);
+      return;
+    }
+
+    if (stderr) {
+      console.error(`Error in output: ${stderr}`);
+      return;
+    }
+
+    // Split the output into lines and parse each distro
+    const lines = stdout.trim().split('\n');
+    // Remove header lines
+    lines.shift();
+
+    // Process each line and create JSON object for each WSL distro
+    const distros = lines.map(line => {
+      const [name, state, version] = line.trim().split(/\s+/);
+      return { name, state, version: parseInt(version) };
+    });
+
+    // Output the JSON
+    console.log(JSON.stringify(distros, null, 2));
+  });
+}
+
+export async function listWSLDistros(): Promise<void> {
+  
+}
