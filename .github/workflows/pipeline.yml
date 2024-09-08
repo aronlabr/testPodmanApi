@@ -33,7 +33,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
       - run: npm i && npm run build
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v6.7.0
+        env:
+          DOCKER_BUILD_RECORD_UPLOAD: false
         with:
           context: .
           file: "Containerfile"

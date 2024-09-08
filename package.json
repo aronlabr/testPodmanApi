@@ -1,5 +1,5 @@
 {
-  "name": "wsl-lite-int",
+  "name": "wslite",
   "displayName": "WSL Integration Lite",
   "description": "Set up WSL with Podman and Docker Compose for remote Podman connections.",
   "version": "0.0.1-next",
