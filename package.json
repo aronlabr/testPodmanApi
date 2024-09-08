@@ -6,10 +6,19 @@
   "icon": "icon.png",
   "publisher": "brizio",
   "license": "MIT",
+  "keywords": [],
   "engines": {
     "podman-desktop": "latest"
   },
-  "type": "module",
+  "main": "./dist/extension.cjs",
+  "contributes": {
+    "commands": [
+      {
+        "command": "wslite.hello",
+        "title": "My First Extension: Hello World"
+      }
+    ]
+  },
   "scripts": {
     "publish": "MODE='producciton' vite build",
     "build": "vite build",
@@ -17,7 +26,6 @@
     "test:watch": "vitest watch --coverage",
     "watch": "vite build --watch"
   },
-  "keywords": [],
   "devDependencies": {
     "@octokit/rest": "^21.0.2",
     "@podman-desktop/api": "^1.12.0",

@@ -24,8 +24,8 @@ export function initTelemetryLogger(): void {
 
 // Activate the extension asynchronously
 export async function activate(extensionContext: extensionApi.ExtensionContext): Promise<void> {
-  initTelemetryLogger();
-  await getDistros();
+  // initTelemetryLogger();
+  // await getDistros();
 
   let testInput = await extensionApi.window.showInputBox({
     title: "Hello",
@@ -35,7 +35,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
   // extensionApi.commands.registerCommand(`${extInfo.id}.once`, testInput)
   // Create a provider with an example name, ID and icon
   const provider = extensionApi.provider.createProvider(extInfo);
-  const myFirstCommand = extensionApi.commands.registerCommand(`${extInfo.id}.onboarding.testCommand`, async () => {
+  const myFirstCommand = extensionApi.commands.registerCommand(`${extInfo.id}.hello`, async () => {
     // display a choice to the user for selecting some values
     const result = await extensionApi.window.showQuickPick(['un', 'deux', 'trois'], {
       canPickMany: true, // user can select more than one choice
@@ -49,7 +49,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
   // it will stick on the left of the status bar
   const item = extensionApi.window.createStatusBarItem(extensionApi.StatusBarAlignLeft, 100);
   item.text = 'My first command';
-  item.command = `${extInfo.id}.command`;
+  item.command = `${extInfo.id}.hello`;
   item.show();
 
   extensionContext.subscriptions.push(
