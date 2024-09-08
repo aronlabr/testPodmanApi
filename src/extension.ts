@@ -52,13 +52,12 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
   item.command = `${extInfo.id}.hello2`;
   item.show();
 
-  extensionContext.subscriptions.push(
-    myFirstCommand,
-    item
-  );
-
   // Push the new provider to Podman Desktop
   extensionContext.subscriptions.push(provider);
+  
+  extensionContext.subscriptions.push(myFirstCommand);
+  extensionContext.subscriptions.push(item);
+
 }
 
 // Deactivate the extension
