@@ -6,20 +6,17 @@ import { Download } from './download';
 import { Detect } from './detect';
 import { GitHubReleases } from './github-releases';
 
+const extDescription = `This extension provides podman integration with wsl using only stand-alone binaries.\nInstalling and configuring:\n* podman-remote\n* docker-compose`;
+
+
 const extInfo: extensionApi.ProviderOptions = {
   name: 'WSL integration lite',
   id: 'wslite',
-  status: 'installed',
+  status: 'unknown',
   images: {
     icon: './icon.png',
   },
-}
-
-// Telemetry
-let telemetryLogger: extensionApi.TelemetryLogger | undefined;
-
-export function initTelemetryLogger(): void {
-  telemetryLogger = extensionApi.env.createTelemetryLogger();
+  emptyConnectionMarkdownDescription: extDescription
 }
 
 // Activate the extension asynchronously
@@ -35,6 +32,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
   // extensionApi.commands.registerCommand(`${extInfo.id}.once`, testInput)
   // Create a provider with an example name, ID and icon
   const provider = extensionApi.provider.createProvider(extInfo);
+
   const myFirstCommand = extensionApi.commands.registerCommand(`${extInfo.id}.hello`, async () => {
     // display a choice to the user for selecting some values
     const result = await extensionApi.window.showQuickPick(['un', 'deux', 'trois'], {

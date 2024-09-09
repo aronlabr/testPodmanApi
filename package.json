@@ -21,7 +21,22 @@
         "command": "wslite.hello2",
         "title": "My First Extension: Hello World2"
       }
-    ]
+    ],
+    "onboarding": {
+      "title": "Extension Setup",
+      "enablement": "!wslite.isComposeInstalledSystemWide",
+      "steps": [
+        {
+          "id": "checkDownloadedCommand",
+          "label": "Check Compose",
+          "title": "Checking for Compose installation",
+          "command": "compose.onboarding.checkDownloadedCommand",
+          "completionEvents": [
+            "onCommand:compose.onboarding.checkDownloadedCommand"
+          ]
+        }
+      ]
+    }
   },
   "scripts": {
     "publish": "MODE='production' vite build",
