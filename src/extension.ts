@@ -5,6 +5,8 @@ import { getDistros } from './wsl';
 import { Download } from './download';
 import { Detect } from './detect';
 import { GitHubReleases } from './github-releases';
+import path from 'node:path';
+import { existsSync, promises } from 'node:fs';
 
 const extDescription = `This extension provides podman integration with wsl using only stand-alone binaries.\nInstalling and configuring:\n* podman-remote\n* docker-compose`;
 
@@ -18,6 +20,23 @@ const extInfo: extensionApi.ProviderOptions = {
   },
   emptyConnectionMarkdownDescription: extDescription
 }
+
+const myFirstCommand = extensionApi.commands.registerCommand(`${extInfo.id}.hello`, async () => {
+  // display a choice to the user for selecting some values
+  const result = await extensionApi.window.showQuickPick(['un', 'deux', 'trois'], {
+    canPickMany: true, // user can select more than one choice
+  });
+
+  // display an information message with the user choice
+  await extensionApi.window.showInformationMessage(`The choice was: ${result}`);
+});
+
+// create an item in the status bar to run our command
+// it will stick on the left of the status bar
+const item = extensionApi.window.createStatusBarItem(extensionApi.StatusBarAlignLeft, 100);
+item.text = 'My first command';
+item.command = `${extInfo.id}.hello2`;
+item.show();
 
 // Activate the extension asynchronously
 export async function activate(extensionContext: extensionApi.ExtensionContext): Promise<void> {
@@ -33,25 +52,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
   // Create a provider with an example name, ID and icon
   const provider = extensionApi.provider.createProvider(extInfo);
 
-  const myFirstCommand = extensionApi.commands.registerCommand(`${extInfo.id}.hello`, async () => {
-    // display a choice to the user for selecting some values
-    const result = await extensionApi.window.showQuickPick(['un', 'deux', 'trois'], {
-      canPickMany: true, // user can select more than one choice
-    });
-
-    // display an information message with the user choice
-    await extensionApi.window.showInformationMessage(`The choice was: ${result}`);
-  });
-
-  // create an item in the status bar to run our command
-  // it will stick on the left of the status bar
-  const item = extensionApi.window.createStatusBarItem(extensionApi.StatusBarAlignLeft, 100);
-  item.text = 'My first command';
-  item.command = `${extInfo.id}.hello2`;
-  item.show();
-  
-  extensionContext.subscriptions.push(myFirstCommand);
-  extensionContext.subscriptions.push(item);
+  extensionContext.subscriptions.push(myFirstCommand, item);
 
   // Push the new provider to Podman Desktop
   extensionContext.subscriptions.push(provider);

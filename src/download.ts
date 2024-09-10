@@ -7,7 +7,19 @@ import * as extensionApi from '@podman-desktop/api';
 import type { GithubReleaseArtifactMetadata, GitHubReleases } from './github-releases';
 import { makeExecutable } from './cli-run';
 
+interface ToolConfig {
+  name: string;
+  extension: string;
+  release: GithubReleaseArtifactMetadata;
+  archMap: {
+    x64: string;
+    arm64: string;
+  }
+}
+
 export class Download {
+  private storageBinFolder: string = '';
+
   constructor(
     private readonly extensionContext: extensionApi.ExtensionContext,
     private readonly GitHubReleases: GitHubReleases
@@ -47,23 +59,36 @@ export class Download {
     }
   }
 
-  // Download compose from the artifact metadata: GithubReleaseArtifactMetadata
-  // this will download it to the storage bin folder as well as make it executeable
-  async download(release: GithubReleaseArtifactMetadata): Promise<void> {
-    // Get asset id
-    const assetId = await this.GitHubReleases.getReleaseAssetId(release.id, arch());
-
-    // Get the storage and check to see if it exists before we download Compose
-    const storageData = this.extensionContext.storagePath;
-    const storageBinFolder = path.resolve(storageData, 'bin');
-    if (!existsSync(storageBinFolder)) {
-      await promises.mkdir(storageBinFolder, { recursive: true });
+  async setup(): Promise<void> {
+    this.storageBinFolder = path.join(this.extensionContext.storagePath, 'bin');
+    if (!existsSync(this.storageBinFolder)) {
+      await promises.mkdir(this.storageBinFolder, { recursive: true });
     }
+  }
 
-    const dockerComposeDownloadLocation = path.resolve(storageBinFolder, `docker-compose`);
+  async download(tool: ToolConfig): Promise<void> {
+    const assetId = await this.GitHubReleases.getReleaseAssetId(tool.release.id, arch());
+    const toolDownloadLocation = path.resolve(this.storageBinFolder, tool.name);
 
     // Download the asset and make it executable
-    await this.GitHubReleases.downloadReleaseAsset(assetId, dockerComposeDownloadLocation);
-    await makeExecutable(dockerComposeDownloadLocation);
+    await this.GitHubReleases.downloadReleaseAsset(assetId, toolDownloadLocation);
+    if (tool.name === 'docker-compose') {
+      await makeExecutable(toolDownloadLocation);
+    }
+  }
+
+  async update(tool: ToolConfig) {
+    const latestRelease = await this.getLatestVersionAsset()
+
+    if (tool.release.tag !== latestRelease.tag) {
+      tool.release = latestRelease
+      await this.download(tool)
+    }
+  }
+
+  async clean(): Promise<void> {
+    if (existsSync(this.storageBinFolder)) {
+      await promises.rmdir(this.extensionContext.storagePath, { recursive: true });
+    }
   }
 }
