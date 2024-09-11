@@ -4,10 +4,6 @@ import * as extensionApi from '@podman-desktop/api';
 // Run the WSL command to list distributions with verbose info
 export async function getDistros(): Promise<void> {
   const { stderr, stdout } = await extensionApi.process.exec('wsl', ['-l', '-v'])
-  // if (error) {
-  //   console.error(`Error executing command: ${error.message}`);
-  //   return;
-  // }
 
   if (stderr) {
     console.error(`Error in output: ${stderr}`);
@@ -16,7 +12,7 @@ export async function getDistros(): Promise<void> {
 
   // Split the output into lines and parse each distro
   const lines = stdout.trim().split('\n');
-  // Remove header lines
+  // Remove header line
   lines.shift();
 
   // Process each line and create JSON object for each WSL distro

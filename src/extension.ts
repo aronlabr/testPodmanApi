@@ -2,14 +2,13 @@ import { Octokit } from '@octokit/rest';
 import * as extensionApi from '@podman-desktop/api';
 
 import { getDistros } from './wsl';
-import { Download } from './download';
+import { Download, ToolConfig } from './download';
 import { Detect } from './detect';
 import { GitHubReleases } from './github-releases';
 import path from 'node:path';
 import { existsSync, promises } from 'node:fs';
 
 const extDescription = `This extension provides podman integration with wsl using only stand-alone binaries.\nInstalling and configuring:\n* podman-remote\n* docker-compose`;
-
 
 const extInfo: extensionApi.ProviderOptions = {
   name: 'WSL integration lite',
@@ -20,6 +19,31 @@ const extInfo: extensionApi.ProviderOptions = {
   },
   emptyConnectionMarkdownDescription: extDescription
 }
+
+const wslTools: ToolConfig[] = [
+  {
+    name: 'docker-compose',
+    org: 'docker',
+    repo: 'compose',
+    extension: '',
+    archMap: {
+      x64: 'x86_64',
+      arm64: 'aarch64',
+    },
+    release: null,
+  },
+  {
+    name: 'podman-remote-static',
+    org: 'containers',
+    repo: 'podman',
+    extension: '.tar.gz',
+    archMap: {
+      x64: 'amd64',
+      arm64: 'arm64',
+    },
+    release: null,
+  },
+]
 
 const myFirstCommand = extensionApi.commands.registerCommand(`${extInfo.id}.hello`, async () => {
   // display a choice to the user for selecting some values
@@ -42,17 +66,40 @@ item.show();
 export async function activate(extensionContext: extensionApi.ExtensionContext): Promise<void> {
   // initTelemetryLogger();
   // await getDistros();
+  const octokit = new Octokit();
+  const releases = new GitHubReleases(octokit);
+  const downloadManager = new Download(extensionContext, releases)
 
-  // let testInput = await extensionApi.window.showInputBox({
-  //   title: "Hello",
-  //   markdownDescription: "Hola extension",
-  //   valueSelection: [1, 2]
-  // });
-  // extensionApi.commands.registerCommand(`${extInfo.id}.once`, testInput)
-  // Create a provider with an example name, ID and icon
+  const setupBinFolder = extensionApi.commands.registerCommand(
+    `${extInfo.id}.onboarding.setupBinFolder`,
+    async () => await downloadManager.setup()
+  )
+  
+  const checkDownload = extensionApi.commands.registerCommand(
+    `${extInfo.id}.onboarding.checkDownloadedCommand`,
+    async () => {
+      extensionApi.commands.executeCommand(`${extInfo.id}.onboarding.setupBinFolder`)
+      wslTools.map( tool => {
+        downloadManager.tool = tool
+        const isDownloaded = downloadManager.checkDownloadedTool()
+        if (isDownloaded) {
+          extensionApi.context.setValue(`${tool.repo}IsNotDownloaded`, false, 'onboarding');
+        } else {
+          extensionApi.context.setValue(`${tool.repo}IsNotDownloaded`, true, 'onboarding');
+        }
+      })
+    },
+  
+  )
+
   const provider = extensionApi.provider.createProvider(extInfo);
 
-  extensionContext.subscriptions.push(myFirstCommand, item);
+  extensionContext.subscriptions.push(
+    setupBinFolder,
+    checkDownload,
+    myFirstCommand,
+    item
+  );
 
   // Push the new provider to Podman Desktop
   extensionContext.subscriptions.push(provider);

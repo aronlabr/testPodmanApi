@@ -27,6 +27,15 @@
       "enablement": "!wslite.isComposeInstalledSystemWide",
       "steps": [
         {
+          "id": "setupBinFolder",
+          "label": "Create Storage folder",
+          "title": "Creating safe storage for binaries",
+          "command": "wslite.onboarding.setupBinFolder",
+          "completionEvents": [
+            "onCommand:wslite.onboarding.setupBinFolder"
+          ]
+        },
+        {
           "id": "checkDownloadedCommand",
           "label": "Check Compose",
           "title": "Checking for Compose installation",

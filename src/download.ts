@@ -4,26 +4,39 @@ import * as path from 'node:path';
 
 import * as extensionApi from '@podman-desktop/api';
 
-import type { GithubReleaseArtifactMetadata, GitHubReleases } from './github-releases';
+import { GithubReleaseArtifactMetadata, GitHubReleases } from './github-releases';
 import { makeExecutable } from './cli-run';
 
-interface ToolConfig {
+export interface ToolConfig {
   name: string;
+  org: string;
+  repo: string;
   extension: string;
-  release: GithubReleaseArtifactMetadata;
+  release: GithubReleaseArtifactMetadata | null;
   archMap: {
     x64: string;
     arm64: string;
   }
 }
 
-export class Download {
+export class Download{
   private storageBinFolder: string = '';
+  private _tool: ToolConfig | null = null;
 
   constructor(
     private readonly extensionContext: extensionApi.ExtensionContext,
     private readonly GitHubReleases: GitHubReleases
   ) { }
+
+  set tool(v: ToolConfig){
+    if (v) {
+      this._tool = v;
+      this.GitHubReleases.owner = this._tool.org
+      this.GitHubReleases.repo = this._tool.repo
+    } else {
+      throw new Error("Invalid tool configuration");
+    }
+  }
 
   // Get the latest version of Compose from GitHub Releases
   // and return the artifact metadata
@@ -66,29 +79,40 @@ export class Download {
     }
   }
 
-  async download(tool: ToolConfig): Promise<void> {
-    const assetId = await this.GitHubReleases.getReleaseAssetId(tool.release.id, arch());
-    const toolDownloadLocation = path.resolve(this.storageBinFolder, tool.name);
+  async download(): Promise<void> {
+    if (!this._tool || !this._tool.release) {
+      return
+    }
+    const assetId = await this.GitHubReleases.getReleaseAssetId(this._tool.release.id, arch());
+    const toolDownloadLocation = path.resolve(this.storageBinFolder, this._tool.name);
 
     // Download the asset and make it executable
     await this.GitHubReleases.downloadReleaseAsset(assetId, toolDownloadLocation);
-    if (tool.name === 'docker-compose') {
+    if (this._tool.name === 'docker-compose') {
       await makeExecutable(toolDownloadLocation);
     }
   }
 
-  async update(tool: ToolConfig) {
+  async update() {
     const latestRelease = await this.getLatestVersionAsset()
-
-    if (tool.release.tag !== latestRelease.tag) {
-      tool.release = latestRelease
-      await this.download(tool)
+    if (this._tool && this._tool.release) {
+      if ( this._tool.release.tag !== latestRelease.tag) {
+        this._tool.release = latestRelease
+        await this.download()
+      }
     }
   }
 
   async clean(): Promise<void> {
     if (existsSync(this.storageBinFolder)) {
       await promises.rmdir(this.extensionContext.storagePath, { recursive: true });
+    }
+  }
+
+  checkDownloadedTool() {
+    if (this._tool && this._tool.name) {
+      const toolPath = path.join(this.storageBinFolder, this._tool.name);
+      return existsSync(toolPath)
     }
   }
 }

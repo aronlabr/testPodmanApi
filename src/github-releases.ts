@@ -11,22 +11,30 @@ export interface GithubReleaseArtifactMetadata extends QuickPickItem {
 
 // Allows to interact with Tool Releases on GitHub
 export class GitHubReleases {
-  private readonly GITHUB_OWNER: string;
-  private readonly GITHUB_REPOSITORY: string;
+  private _owner: string;
+  private _repository: string;
 
-  constructor(private readonly octokit: Octokit, readonly owner: string, readonly repo: string) {
-    this.GITHUB_OWNER = owner;
-    this.GITHUB_REPOSITORY = repo;
+  constructor(private readonly octokit: Octokit) { 
+    this._owner = ''
+    this._repository = ''
   }
 
+  set owner(v: string) {
+    this._owner = v;
+  }
+
+  set repo(v: string) {
+    this._repository = v;
+  }
+  
   // Provides last 5 majors releases from GitHub using the GitHub API
   // return name, tag and id of the release
   async grabLatestsReleasesMetadata(): Promise<GithubReleaseArtifactMetadata[]> {
     // Grab last 5 majors releases from GitHub using the GitHub API
 
     const lastReleases = await this.octokit.repos.listReleases({
-      owner: this.GITHUB_OWNER,
-      repo: this.GITHUB_REPOSITORY,
+      owner: this._owner,
+      repo: this._repository,
       
     });
 
@@ -67,12 +75,12 @@ export class GitHubReleases {
       },
     };
 
-    const repoConfig = this.GITHUB_REPOSITORY === 'compose' ? 
+    const repoConfig = this._repository === 'compose' ? 
                             repositoryMap.compose : repositoryMap.podman;
 
     const listOfAssets = await this.octokit.repos.listReleaseAssets({
-      owner: this.GITHUB_OWNER,
-      repo: this.GITHUB_REPOSITORY,
+      owner: this._owner,
+      repo: this._repository,
       release_id: releaseId,
     });
 
@@ -90,8 +98,8 @@ export class GitHubReleases {
   // download the given asset id
   async downloadReleaseAsset(assetId: number, destination: string): Promise<void> {
     const asset = await this.octokit.repos.getReleaseAsset({
-      owner: this.GITHUB_OWNER,
-      repo: this.GITHUB_REPOSITORY,
+      owner: this._owner,
+      repo: this._repository,
       asset_id: assetId,
       headers: {
         accept: 'application/octet-stream',
