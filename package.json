@@ -1,7 +1,7 @@
 {
   "name": "wslite",
   "displayName": "WSL Integration Lite",
-  "description": "Set up WSL with Podman and Docker Compose for remote Podman connections.",
+  "description": "Set up WSL with Podman and Docker wslite for remote Podman connections.",
   "version": "0.0.1-next",
   "icon": "icon.png",
   "publisher": "brizio",
@@ -24,7 +24,7 @@
     ],
     "onboarding": {
       "title": "Extension Setup",
-      "enablement": "!wslite.isComposeInstalledSystemWide",
+      "enablement": "!wslite.binsAreInstalled",
       "steps": [
         {
           "id": "setupBinFolder",
@@ -37,11 +37,45 @@
         },
         {
           "id": "checkDownloadedCommand",
-          "label": "Check Compose",
-          "title": "Checking for Compose installation",
-          "command": "compose.onboarding.checkDownloadedCommand",
+          "label": "Check wslite",
+          "title": "Checking for wslite installation",
+          "command": "wslite.onboarding.checkDownloadedCommand",
           "completionEvents": [
-            "onCommand:compose.onboarding.checkDownloadedCommand"
+            "onCommand:wslite.onboarding.checkDownloadedCommand"
+          ]
+        },
+        {
+          "id": "welcomeDownloadView",
+          "label": "WSL Download",
+          "title": "WSL download",
+          "when": "!wslite.binsAreInstalled && !onboardingContext:binsAreDownloaded",
+          "content": [
+            [
+              {
+                "value": "Podman Desktop provides optional command line support for wslite files with Podman."
+              }
+            ],
+            [
+              {
+                "value": "> ℹ️ **Note:** If you would like to use `docker wslite up` or `docker-wslite` with Podman, [enable Docker Compatibility](/preferences/default/preferences.podman-desktop.podman).",
+                "highlight": true
+              }
+            ],
+            [
+              {
+                "value": "The binaries for WSL of Podman-remote (Version ${onboardingContext:podmanDownloadVersion}) and Docker compose (Version ${onboardingContext:composeDownloadVersion}) will be downloaded in the next step. :link[Want to download a different version?]"
+              }
+            ]
+          ]
+        },
+        {
+          "id": "downloadCommand",
+          "title": "Downloading binaries ${onboardingContext:wsliteDownloadVersion}",
+          "description": "Downloading the binaries.\n\nOnce downloaded, the next step will install and configure them in the WLSs of choice",
+          "when": "!wslite.binsAreInstalled && !onboardingContext:binsAreDownloaded",
+          "command": "wslite.onboarding.downloadCommand",
+          "completionEvents": [
+            "onCommand:wslite.onboarding.downloadCommand"
           ]
         }
       ]

@@ -7,6 +7,7 @@ import { Detect } from './detect';
 import { GitHubReleases } from './github-releases';
 import path from 'node:path';
 import { existsSync, promises } from 'node:fs';
+import { extract } from './cli-run';
 
 const extDescription = `This extension provides podman integration with wsl using only stand-alone binaries.\nInstalling and configuring:\n* podman-remote\n* docker-compose`;
 
@@ -62,9 +63,17 @@ item.text = 'My first command';
 item.command = `${extInfo.id}.hello2`;
 item.show();
 
+// Telemetry
+let telemetryLogger: extensionApi.TelemetryLogger | undefined;
+
+export function initTelemetryLogger(): void {
+  telemetryLogger = extensionApi.env.createTelemetryLogger();
+}
+
+
 // Activate the extension asynchronously
 export async function activate(extensionContext: extensionApi.ExtensionContext): Promise<void> {
-  // initTelemetryLogger();
+  initTelemetryLogger();
   // await getDistros();
   const octokit = new Octokit();
   const releases = new GitHubReleases(octokit);
@@ -74,22 +83,66 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
     `${extInfo.id}.onboarding.setupBinFolder`,
     async () => await downloadManager.setup()
   )
-  
+
   const checkDownload = extensionApi.commands.registerCommand(
     `${extInfo.id}.onboarding.checkDownloadedCommand`,
     async () => {
+
       extensionApi.commands.executeCommand(`${extInfo.id}.onboarding.setupBinFolder`)
-      wslTools.map( tool => {
-        downloadManager.tool = tool
-        const isDownloaded = downloadManager.checkDownloadedTool()
-        if (isDownloaded) {
-          extensionApi.context.setValue(`${tool.repo}IsNotDownloaded`, false, 'onboarding');
-        } else {
-          extensionApi.context.setValue(`${tool.repo}IsNotDownloaded`, true, 'onboarding');
-        }
-      })
+      await Promise.all(
+        wslTools.map( async tool => {
+          downloadManager.tool = tool
+          const isDownloaded = downloadManager.checkDownloadedTool()
+          extensionApi.context.setValue(`${tool.repo}IsDownloaded`, isDownloaded, 'onboarding');
+          
+          if (!isDownloaded) {
+            // Get the latest version and store the metadata in a local variable
+            const toolLatestVersion = await downloadManager.getLatestVersionAsset();
+            // Set the value in the context to the version we're downloading so it appears in the onboarding sequence
+            if (toolLatestVersion) {
+              tool.release = toolLatestVersion;
+              extensionApi.context.setValue(`${tool.repo}DownloadVersion`, tool.release.tag, 'onboarding');
+            }
+          }
+          // Log if it's downloaded and what version is being selected for download (can be either latest, or chosen by user)
+          telemetryLogger?.logUsage(`${extInfo.id}.onboarding.checkDownloadedCommand`, {
+            tool: tool.repo,
+            downloaded: isDownloaded,
+            version: tool.release?.tag,
+          });
+        })
+      );
     },
-  
+  )
+
+  const execDownload = extensionApi.commands.registerCommand(
+    `${extInfo.id}.onboarding.downloadCommand`,
+    async () => {
+      let toolDownloaded: Boolean[] = []
+      await Promise.all(
+        wslTools.map( async tool => {
+          if (!tool.release) {
+            tool.release = await downloadManager.getLatestVersionAsset();
+          }
+
+          let downloaded: Boolean = false
+          try {
+            downloadManager.tool = tool
+            await downloadManager.download();
+
+            downloaded = true;
+            toolDownloaded.push(downloaded)
+          } finally {
+            telemetryLogger?.logUsage(`${extInfo.id}.onboarding.downloadCommand`, {
+              successful: downloaded,
+              version: tool.release?.tag,
+            });
+          }
+        })
+      )
+      const areDownloaded = toolDownloaded.every( v => v)
+      extensionApi.context.setValue('binsAreDownloaded', areDownloaded, 'onboarding');
+    }
   )
 
   const provider = extensionApi.provider.createProvider(extInfo);

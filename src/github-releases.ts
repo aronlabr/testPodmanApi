@@ -1,8 +1,9 @@
-import * as fs from 'node:fs';
+import { existsSync, promises } from 'node:fs';
 import * as path from 'node:path';
 
 import type { Octokit } from '@octokit/rest';
 import { QuickPickItem } from '@podman-desktop/api';
+import { arch } from 'node:os';
 
 export interface GithubReleaseArtifactMetadata extends QuickPickItem {
   tag: string;
@@ -55,41 +56,17 @@ export class GitHubReleases {
 
   // Get the asset id of a given release number for a given operating system and architecture
   // arch: x64, arm64 (see os.arch())
-  async getReleaseAssetId(releaseId: number, arch: string): Promise<number> {
-    const repositoryMap = {
-      compose: {
-        assetName: 'docker-compose',
-        extension: '',
-        archMap: {
-          x64: 'x86_64',
-          arm64: 'aarch64',
-        },
-      },
-      podman: {
-        assetName: 'podman-remote-static',
-        extension: '.tar.gz',
-        archMap: {
-          x64: 'amd64',
-          arm64: 'arm64',
-        },
-      },
-    };
-
-    const repoConfig = this._repository === 'compose' ? 
-                            repositoryMap.compose : repositoryMap.podman;
-
+  async getReleaseAssetId(releaseId: number, assetName: string, extension: string): Promise<number> {
     const listOfAssets = await this.octokit.repos.listReleaseAssets({
       owner: this._owner,
       repo: this._repository,
       release_id: releaseId,
     });
 
-    const searchedAssetName = `${repoConfig.assetName}-linux-${repoConfig.archMap[arch as keyof typeof repoConfig.archMap]}${repoConfig.extension}`;
-
     // search for the right asset
-    const asset = listOfAssets.data.find(asset => searchedAssetName === asset.name);
+    const asset = listOfAssets.data.find(asset => `${assetName}${extension}` === asset.name);
     if (!asset) {
-      throw new Error(`No asset found for linux and ${arch}`);
+      throw new Error(`No asset found for linux and ${arch()}`);
     }
 
     return asset.id;
@@ -109,10 +86,10 @@ export class GitHubReleases {
     // check the parent folder exists
     const parentFolder = path.dirname(destination);
 
-    if (!fs.existsSync(parentFolder)) {
-      await fs.promises.mkdir(parentFolder, { recursive: true });
+    if (!existsSync(parentFolder)) {
+      await promises.mkdir(parentFolder, { recursive: true });
     }
     // write the file
-    await fs.promises.writeFile(destination, Buffer.from(asset.data as unknown as ArrayBuffer));
+    await promises.writeFile(destination, Buffer.from(asset.data as unknown as ArrayBuffer));
   }
 }

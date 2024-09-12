@@ -5,7 +5,7 @@ import * as path from 'node:path';
 import * as extensionApi from '@podman-desktop/api';
 
 import { GithubReleaseArtifactMetadata, GitHubReleases } from './github-releases';
-import { makeExecutable } from './cli-run';
+import { extract, makeExecutable } from './cli-run';
 
 export interface ToolConfig {
   name: string;
@@ -19,7 +19,7 @@ export interface ToolConfig {
   }
 }
 
-export class Download{
+export class Download {
   private storageBinFolder: string = '';
   private _tool: ToolConfig | null = null;
 
@@ -28,7 +28,7 @@ export class Download{
     private readonly GitHubReleases: GitHubReleases
   ) { }
 
-  set tool(v: ToolConfig){
+  set tool(v: ToolConfig) {
     if (v) {
       this._tool = v;
       this.GitHubReleases.owner = this._tool.org
@@ -83,20 +83,28 @@ export class Download{
     if (!this._tool || !this._tool.release) {
       return
     }
-    const assetId = await this.GitHubReleases.getReleaseAssetId(this._tool.release.id, arch());
-    const toolDownloadLocation = path.resolve(this.storageBinFolder, this._tool.name);
+    const toolArch = this._tool.archMap[arch() as keyof typeof this._tool.archMap ]
+    const toolAssetName = `${this._tool.name}-linux${this._tool.repo === 'compose' ? '-' : '_'}${toolArch}`
+    const assetId = await this.GitHubReleases.getReleaseAssetId(this._tool.release.id, toolAssetName, this._tool.extension);
+    
+    const toolDownloadLocation = path.resolve(this.storageBinFolder, `${this._tool.name}${this._tool.extension}`);
 
     // Download the asset and make it executable
     await this.GitHubReleases.downloadReleaseAsset(assetId, toolDownloadLocation);
     if (this._tool.name === 'docker-compose') {
       await makeExecutable(toolDownloadLocation);
     }
+    
+    if (this._tool.repo === 'podman') {
+      await extract(this.storageBinFolder)
+      await promises.rename(path.join(this.storageBinFolder, toolAssetName), path.join(this.storageBinFolder, this._tool.name))
+    }
   }
 
-  async update() {
+  async update(): Promise<void> {
     const latestRelease = await this.getLatestVersionAsset()
     if (this._tool && this._tool.release) {
-      if ( this._tool.release.tag !== latestRelease.tag) {
+      if (this._tool.release.tag !== latestRelease.tag) {
         this._tool.release = latestRelease
         await this.download()
       }
@@ -109,10 +117,11 @@ export class Download{
     }
   }
 
-  checkDownloadedTool() {
+  checkDownloadedTool(): Boolean {
     if (this._tool && this._tool.name) {
       const toolPath = path.join(this.storageBinFolder, this._tool.name);
       return existsSync(toolPath)
     }
+    return false
   }
 }
