@@ -114,6 +114,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
     },
   )
 
+  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
   const execDownload = extensionApi.commands.registerCommand(
     `${extInfo.id}.onboarding.downloadCommand`,
     async () => {
@@ -138,6 +139,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
           }
         })
       )
+      await sleep(5000);
       const areDownloaded = toolDownloaded.every( v => v)
       extensionApi.context.setValue('binsAreDownloaded', areDownloaded, 'onboarding');
     }
