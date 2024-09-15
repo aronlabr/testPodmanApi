@@ -73,7 +73,7 @@ export class Download {
   }
 
   async setup(): Promise<void> {
-    this.storageBinFolder = path.join(this.extensionContext.storagePath, 'bin');
+    this.storageBinFolder = this.extensionContext.storagePath //path.join(this.extensionContext.storagePath, 'bin');
     if (!existsSync(this.storageBinFolder)) {
       await promises.mkdir(this.storageBinFolder, { recursive: true });
     }

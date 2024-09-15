@@ -1,4 +1,3 @@
-import { exec } from "child_process";
 import * as extensionApi from '@podman-desktop/api';
 
 // Run the WSL command to list distributions with verbose info

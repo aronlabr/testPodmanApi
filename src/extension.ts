@@ -23,17 +23,6 @@ const extInfo: extensionApi.ProviderOptions = {
 
 const wslTools: ToolConfig[] = [
   {
-    name: 'docker-compose',
-    org: 'docker',
-    repo: 'compose',
-    extension: '',
-    archMap: {
-      x64: 'x86_64',
-      arm64: 'aarch64',
-    },
-    release: null,
-  },
-  {
     name: 'podman-remote-static',
     org: 'containers',
     repo: 'podman',
@@ -41,6 +30,17 @@ const wslTools: ToolConfig[] = [
     archMap: {
       x64: 'amd64',
       arm64: 'arm64',
+    },
+    release: null,
+  },
+  {
+    name: 'docker-compose',
+    org: 'docker',
+    repo: 'compose',
+    extension: '',
+    archMap: {
+      x64: 'x86_64',
+      arm64: 'aarch64',
     },
     release: null,
   },
@@ -88,7 +88,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
     `${extInfo.id}.onboarding.checkDownloadedCommand`,
     async () => {
 
-      extensionApi.commands.executeCommand(`${extInfo.id}.onboarding.setupBinFolder`)
+      // extensionApi.commands.executeCommand(`${extInfo.id}.onboarding.setupBinFolder`)
       await Promise.all(
         wslTools.map( async tool => {
           downloadManager.tool = tool
