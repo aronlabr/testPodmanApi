@@ -128,7 +128,6 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
           let downloaded: Boolean = false
           try {
             await downloadManager.download();
-
             downloaded = true;
             toolDownloaded.push(downloaded)
           } finally {

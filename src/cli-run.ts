@@ -20,7 +20,7 @@ async function moveFilesToParentDir(directory: string): Promise<void> {
   Promise.all(
     files.map(async file => {
 
-      const filePath = path.join(directory, file);
+      const filePath = path.resolve(directory, file);
       const stats = await promises.stat(filePath)
 
       if (stats.isDirectory()) {

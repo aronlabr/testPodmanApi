@@ -95,10 +95,10 @@ export class Download {
       await makeExecutable(toolDownloadLocation);
     }
     
-    if (this._tool.repo === 'podman') {
-      await extract(this.storageBinFolder)
-      await promises.rename(path.join(this.storageBinFolder, toolAssetName), path.join(this.storageBinFolder, this._tool.name))
-    }
+    // if (this._tool.repo === 'podman') {
+    //   await extract(this.storageBinFolder)
+    //   await promises.rename(path.resolve(this.storageBinFolder, toolAssetName), path.resolve(this.storageBinFolder, this._tool.name))
+    // }
   }
 
   async update(): Promise<void> {
