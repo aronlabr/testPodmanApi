@@ -82,6 +82,7 @@
           "id": "downloadSuccessfulView",
           "title": "Binaries successfully Downloaded",
           "when": "!wslite.binsAreInstalled && onboardingContext:binsAreDownloaded",
+          "state": "completed",
           "content": [
             [
               {
