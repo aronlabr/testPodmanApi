@@ -89,7 +89,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
     async () => {
       // extensionApi.commands.executeCommand(`${extInfo.id}.onboarding.setupBinFolder`)
       await Promise.all(
-        wslTools.map( async (tool) => {
+        wslTools.map( async tool => {
           downloadManager.tool = tool
           const isDownloaded = downloadManager.checkDownloadedTool()
           extensionApi.context.setValue(`${tool.repo}IsDownloaded`, isDownloaded, 'onboarding');
@@ -120,6 +120,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
       let toolDownloaded: Boolean[] = []
       await Promise.all(
         wslTools.map( async tool => {
+          downloadManager.tool = tool
           if (!tool.release) {
             tool.release = await downloadManager.getLatestVersionAsset();
           }
