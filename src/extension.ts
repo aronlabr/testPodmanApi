@@ -87,7 +87,6 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
   const checkDownload = extensionApi.commands.registerCommand(
     `${extInfo.id}.onboarding.checkDownloadedCommand`,
     async () => {
-
       // extensionApi.commands.executeCommand(`${extInfo.id}.onboarding.setupBinFolder`)
       await Promise.all(
         wslTools.map( async (tool) => {
@@ -150,6 +149,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
   extensionContext.subscriptions.push(
     setupBinFolder,
     checkDownload,
+    execDownload,
     myFirstCommand,
     item
   );
