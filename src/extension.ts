@@ -89,11 +89,11 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
     async () => {
       // extensionApi.commands.executeCommand(`${extInfo.id}.onboarding.setupBinFolder`)
       await Promise.all(
-        wslTools.map( async tool => {
+        wslTools.map(async tool => {
           downloadManager.tool = tool
           const isDownloaded = downloadManager.checkDownloadedTool()
           extensionApi.context.setValue(`${tool.repo}IsDownloaded`, isDownloaded, 'onboarding');
-          
+
           if (!isDownloaded) {
             // Get the latest version and store the metadata in a local variable
             const toolLatestVersion = await downloadManager.getLatestVersionAsset();
@@ -120,7 +120,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
     async () => {
       let toolDownloaded: Boolean[] = [];
       await Promise.all(
-        wslTools.map( async tool => {
+        wslTools.map(async tool => {
           downloadManager.tool = tool
           if (!tool.release) {
             tool.release = await downloadManager.getLatestVersionAsset();
@@ -128,9 +128,9 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
 
           let downloaded: Boolean = false
           // try {
-            await downloadManager.download();
-            downloaded = true;
-            toolDownloaded.push(downloaded);
+          await downloadManager.download();
+          downloaded = true;
+          toolDownloaded.push(downloaded);
           // } finally {
           //   telemetryLogger?.logUsage(`${extInfo.id}.onboarding.downloadCommand`, {
           //     successful: downloaded,
@@ -140,7 +140,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
         })
       )
       await sleep(5000);
-      const areDownloaded = toolDownloaded.every( v => v);
+      const areDownloaded = toolDownloaded.every(v => v);
       extensionApi.context.setValue('binsAreDownloaded', areDownloaded, 'onboarding');
     }
   )
