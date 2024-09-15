@@ -77,6 +77,18 @@
           "completionEvents": [
             "onCommand:wslite.onboarding.downloadCommand"
           ]
+        },
+        {
+          "id": "downloadSuccessfulView",
+          "title": "Binaries successfully Downloaded",
+          "when": "!wslite.binsAreInstalled && onboardingContext:binsAreDownloaded",
+          "content": [
+            [
+              {
+                "value": "Binaries have been successfully downloaded! In order for `podman compose` (podman CLI v5+) to work correctly inside the wsl."
+              }
+            ]
+          ]
         }
       ]
     }
