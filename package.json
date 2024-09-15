@@ -70,7 +70,7 @@
         },
         {
           "id": "downloadCommand",
-          "title": "Downloading binaries ${onboardingContext:wsliteDownloadVersion}",
+          "title": "Downloading binaries Podman-remote (${onboardingContext:podmanDownloadVersion}) and Docker compose (${onboardingContext:composeDownloadVersion})",
           "description": "Downloading the binaries.\n\nOnce downloaded, the next step will install and configure them in the WLSs of choice",
           "when": "!wslite.binsAreInstalled && !onboardingContext:binsAreDownloaded",
           "command": "wslite.onboarding.downloadCommand",
