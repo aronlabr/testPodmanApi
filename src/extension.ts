@@ -1,13 +1,13 @@
 import { Octokit } from '@octokit/rest';
 import * as extensionApi from '@podman-desktop/api';
 
-import { getDistros } from './wsl';
+// import { getDistros } from './wsl';
 import { Download, ToolConfig } from './download';
-import { Detect } from './detect';
+// import { Detect } from './detect';
 import { GitHubReleases } from './github-releases';
-import path from 'node:path';
-import { existsSync, promises } from 'node:fs';
-import { extract } from './cli-run';
+// import path from 'node:path';
+// import { existsSync, promises } from 'node:fs';
+// import { extract } from './cli-run';
 
 const extDescription = `This extension provides podman integration with wsl using only stand-alone binaries.\nInstalling and configuring:\n* podman-remote\n* docker-compose`;
 
@@ -118,7 +118,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
   const execDownload = extensionApi.commands.registerCommand(
     `${extInfo.id}.onboarding.downloadCommand`,
     async () => {
-      let toolDownloaded: Boolean[] = []
+      let toolDownloaded: Boolean[] = [];
       await Promise.all(
         wslTools.map( async tool => {
           downloadManager.tool = tool
@@ -127,36 +127,34 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
           }
 
           let downloaded: Boolean = false
-          try {
+          // try {
             await downloadManager.download();
             downloaded = true;
-            toolDownloaded.push(downloaded)
-          } finally {
-            telemetryLogger?.logUsage(`${extInfo.id}.onboarding.downloadCommand`, {
-              successful: downloaded,
-              version: tool.release?.tag,
-            });
-          }
+            toolDownloaded.push(downloaded);
+          // } finally {
+          //   telemetryLogger?.logUsage(`${extInfo.id}.onboarding.downloadCommand`, {
+          //     successful: downloaded,
+          //     version: tool.release?.tag,
+          //   });
+          // }
         })
       )
       await sleep(5000);
-      const areDownloaded = toolDownloaded.every( v => v)
+      const areDownloaded = toolDownloaded.every( v => v);
       extensionApi.context.setValue('binsAreDownloaded', areDownloaded, 'onboarding');
     }
   )
 
-  const provider = extensionApi.provider.createProvider(extInfo);
+  // const provider = extensionApi.provider.createProvider(extInfo);
 
   extensionContext.subscriptions.push(
     setupBinFolder,
     checkDownload,
     execDownload,
-    myFirstCommand,
-    item
   );
 
   // Push the new provider to Podman Desktop
-  extensionContext.subscriptions.push(provider);
+  // extensionContext.subscriptions.push(provider);
 
 }
 
