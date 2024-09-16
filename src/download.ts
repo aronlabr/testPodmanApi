@@ -79,9 +79,9 @@ export class Download {
     }
   }
 
-  async download(): Promise<Boolean> {
+  async download(): Promise<void> {
     if (!this._tool || !this._tool.release) {
-      return false
+      return
     }
     const toolArch = this._tool.archMap[arch() as keyof typeof this._tool.archMap ]
     const toolAssetName = `${this._tool.name}-linux${this._tool.repo === 'compose' ? '-' : '_'}${toolArch}`
@@ -90,19 +90,14 @@ export class Download {
     const toolDownloadLocation = path.resolve(this.storageBinFolder, `${this._tool.name}${this._tool.extension}`);
 
     // Download the asset and make it executable
-    try {
-      await this.GitHubReleases.downloadReleaseAsset(assetId, toolDownloadLocation);
-      if (this._tool.name === 'docker-compose') {
-        await makeExecutable(toolDownloadLocation);
-      }
-      // if (this._tool.repo === 'podman') {
-      //   await extract(this.storageBinFolder)
-      //   await promises.rename(path.resolve(this.storageBinFolder, toolAssetName), path.resolve(this.storageBinFolder, this._tool.name))
-      // }
-      return true
-    } catch {
-      return false
+    await this.GitHubReleases.downloadReleaseAsset(assetId, toolDownloadLocation);
+    if (this._tool.name === 'docker-compose') {
+      await makeExecutable(toolDownloadLocation);
     }
+    // if (this._tool.repo === 'podman') {
+    //   await extract(this.storageBinFolder)
+    //   await promises.rename(path.resolve(this.storageBinFolder, toolAssetName), path.resolve(this.storageBinFolder, this._tool.name))
+    // }
   }
 
   async update(): Promise<void> {

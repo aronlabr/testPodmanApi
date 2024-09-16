@@ -131,25 +131,44 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
     `${extInfo.id}.onboarding.downloadCommand`,
     async () => {
       let toolDownloaded: Boolean[] = [];
-      await Promise.all(
-        wslTools.map(async tool => {
-          downloadManager.tool = tool
+      for (const tool of wslTools) {
+        downloadManager.tool = tool
 
-          if (!tool.release) {
-            tool.release = await downloadManager.getLatestVersionAsset();
-            downloadManager.tool = tool
-          }
-          // try {
-          const downloaded: Boolean = await downloadManager.download();
+        if (!tool.release) {
+          tool.release = await downloadManager.getLatestVersionAsset();
+          downloadManager.tool = tool
+        }
+        let downloaded: Boolean = false
+        try {
+          await downloadManager.download();
+          downloaded = true
           toolDownloaded.push(downloaded);
-          // } finally {
-          //   telemetryLogger?.logUsage(`${extInfo.id}.onboarding.downloadCommand`, {
-          //     successful: downloaded,
-          //     version: tool.release?.tag,
-          //   });
-          // }
-        })
-      )
+        } finally {
+          telemetryLogger?.logUsage(`${extInfo.id}.onboarding.downloadCommand`, {
+            successful: downloaded,
+            version: tool.release?.tag,
+          });
+        }
+      }
+      // await Promise.all(
+      //   wslTools.map(async tool => {
+      //     downloadManager.tool = tool
+
+      //     if (!tool.release) {
+      //       tool.release = await downloadManager.getLatestVersionAsset();
+      //       downloadManager.tool = tool
+      //     }
+      //     // try {
+      //     const downloaded: Boolean = await downloadManager.download();
+      //     toolDownloaded.push(downloaded);
+      //     // } finally {
+      //     //   telemetryLogger?.logUsage(`${extInfo.id}.onboarding.downloadCommand`, {
+      //     //     successful: downloaded,
+      //     //     version: tool.release?.tag,
+      //     //   });
+      //     // }
+      //   })
+      // )
       const areDownloaded = toolDownloaded.every(v => v);
       extensionApi.context.setValue('binsAreDownloaded', areDownloaded, 'onboarding');
     }
