@@ -21,6 +21,18 @@ const extInfo: extensionApi.ProviderOptions = {
   emptyConnectionMarkdownDescription: extDescription
 }
 
+const nullTool: ToolConfig = {
+  name: '',
+  org: '',
+  repo: '',
+  extension: '',
+  archMap: {
+    x64: '',
+    arm64: '',
+  },
+  release: null
+}
+
 const wslTools: ToolConfig[] = [
   {
     name: 'docker-compose',
@@ -111,6 +123,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
           });
         })
       );
+      downloadManager.tool = nullTool
     },
   )
 
