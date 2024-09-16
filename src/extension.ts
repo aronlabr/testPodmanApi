@@ -23,17 +23,6 @@ const extInfo: extensionApi.ProviderOptions = {
 
 const wslTools: ToolConfig[] = [
   {
-    name: 'podman-remote-static',
-    org: 'containers',
-    repo: 'podman',
-    extension: '.tar.gz',
-    archMap: {
-      x64: 'amd64',
-      arm64: 'arm64',
-    },
-    release: null,
-  },
-  {
     name: 'docker-compose',
     org: 'docker',
     repo: 'compose',
@@ -41,6 +30,17 @@ const wslTools: ToolConfig[] = [
     archMap: {
       x64: 'x86_64',
       arm64: 'aarch64',
+    },
+    release: null,
+  },
+  {
+    name: 'podman-remote-static',
+    org: 'containers',
+    repo: 'podman',
+    extension: '.tar.gz',
+    archMap: {
+      x64: 'amd64',
+      arm64: 'arm64',
     },
     release: null,
   },
@@ -114,7 +114,6 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
     },
   )
 
-  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
   const execDownload = extensionApi.commands.registerCommand(
     `${extInfo.id}.onboarding.downloadCommand`,
     async () => {
