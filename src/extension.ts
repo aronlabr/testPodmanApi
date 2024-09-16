@@ -122,8 +122,10 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
       await Promise.all(
         wslTools.map(async tool => {
           downloadManager.tool = tool
+
           if (!tool.release) {
             tool.release = await downloadManager.getLatestVersionAsset();
+            downloadManager.tool = tool
           }
 
           let downloaded: Boolean = false

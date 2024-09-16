@@ -12,16 +12,7 @@
   },
   "main": "./dist/extension.cjs",
   "contributes": {
-    "commands": [
-      {
-        "command": "wslite.hello",
-        "title": "My First Extension: Hello World"
-      },
-      {
-        "command": "wslite.hello2",
-        "title": "My First Extension: Hello World2"
-      }
-    ],
+    "commands": [ ],
     "onboarding": {
       "title": "Extension Setup",
       "enablement": "!wslite.binsAreInstalled",

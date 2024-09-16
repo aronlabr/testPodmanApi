@@ -36,7 +36,6 @@ export class GitHubReleases {
     const lastReleases = await this.octokit.repos.listReleases({
       owner: this._owner,
       repo: this._repository,
-      
     });
 
     // keep only releases and not pre-releases
