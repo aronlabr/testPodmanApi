@@ -138,7 +138,6 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
           // }
         })
       )
-      await sleep(5000);
       const areDownloaded = toolDownloaded.every(v => v);
       extensionApi.context.setValue('binsAreDownloaded', areDownloaded, 'onboarding');
     }
