@@ -127,11 +127,8 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
             tool.release = await downloadManager.getLatestVersionAsset();
             downloadManager.tool = tool
           }
-
-          let downloaded: Boolean = false
           // try {
-          await downloadManager.download();
-          downloaded = true;
+          const downloaded: Boolean = await downloadManager.download();
           toolDownloaded.push(downloaded);
           // } finally {
           //   telemetryLogger?.logUsage(`${extInfo.id}.onboarding.downloadCommand`, {
