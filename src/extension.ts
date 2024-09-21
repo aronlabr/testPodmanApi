@@ -24,7 +24,7 @@ const extInfo: extensionApi.ProviderOptions = {
 const wslTools: ToolConfig[] = [
   {
     name: 'docker-compose',
-    org: 'docker',
+    owner: 'docker',
     repo: 'compose',
     extension: '',
     archMap: {
@@ -35,7 +35,7 @@ const wslTools: ToolConfig[] = [
   },
   {
     name: 'podman-remote-static',
-    org: 'containers',
+    owner: 'containers',
     repo: 'podman',
     extension: '.tar.gz',
     archMap: {
@@ -96,7 +96,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
 
           if (!isDownloaded) {
             // Get the latest version and store the metadata in a local variable
-            const toolLatestVersion = await downloadManager.getLatestVersionAsset();
+            const toolLatestVersion = await downloadManager.getLatestVersionAsset({ owner: tool.owner, repo: tool.repo });
             // Set the value in the context to the version we're downloading so it appears in the onboarding sequence
             if (toolLatestVersion) {
               tool.release = toolLatestVersion;
@@ -120,9 +120,9 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
       let toolDownloaded: Boolean[] = [];
       await Promise.all(
         wslTools.map(async tool => {
-          downloadManager.github = { owner: tool.org, repo: tool.repo }
           if (!tool.release) {
-            tool.release = await downloadManager.getLatestVersionAsset();
+            tool.release = await downloadManager.getLatestVersionAsset(
+              { owner: tool.owner, repo: tool.repo });
           }
           let downloaded: Boolean = false
           try {

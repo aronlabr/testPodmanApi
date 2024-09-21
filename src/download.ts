@@ -4,24 +4,17 @@ import * as path from 'node:path';
 
 import * as extensionApi from '@podman-desktop/api';
 
-import { GithubReleaseArtifactMetadata, GitHubReleases } from './github-releases';
+import { GithubInfo, GithubReleaseArtifactMetadata, GitHubReleases } from './github-releases';
 import { extract, makeExecutable } from './cli-run';
 
-export interface ToolConfig {
+export interface ToolConfig extends GithubInfo {
   name: string;
-  org: string;
-  repo: string;
   extension: string;
   release: GithubReleaseArtifactMetadata | null;
   archMap: {
     x64: string;
     arm64: string;
   }
-}
-
-interface GithubData {
-  owner: string;
-  repo: string;
 }
 
 export class Download {
@@ -37,14 +30,14 @@ export class Download {
   set tool(v: ToolConfig) {
     if (v) {
       this._tool = v;
-      this.GitHubReleases.owner = this._tool.org
+      this.GitHubReleases.owner = this._tool.owner
       this.GitHubReleases.repo = this._tool.repo
     } else {
       throw new Error("Invalid tool configuration");
     }
   }
 
-  set github (v: GithubData) {
+  set github(v: GithubInfo) {
     if (v) {
       this.GitHubReleases.owner = v.owner
       this.GitHubReleases.repo = v.repo
@@ -55,24 +48,24 @@ export class Download {
 
   // Get the latest version of Compose from GitHub Releases
   // and return the artifact metadata
-  async getLatestVersionAsset(): Promise<GithubReleaseArtifactMetadata> {
-    const latestReleases = await this.GitHubReleases.grabLatestsReleasesMetadata();
+  async getLatestVersionAsset(repositoryDetails: GithubInfo): Promise<GithubReleaseArtifactMetadata> {
+    const latestReleases = await this.GitHubReleases.grabLatestsReleasesMetadata(repositoryDetails);
     return latestReleases[0];
   }
 
   // Get the latest versions of Compose from GitHub Releases
   // and return the artifacts metadata
-  async getLatestReleases(): Promise<GithubReleaseArtifactMetadata[]> {
-    return this.GitHubReleases.grabLatestsReleasesMetadata();
+  async getLatestReleases(repositoryDetails: GithubInfo): Promise<GithubReleaseArtifactMetadata[]> {
+    return this.GitHubReleases.grabLatestsReleasesMetadata(repositoryDetails);
   }
 
   // Create a "quickpick" prompt to ask the user which version of Compose they want to download
-  async promptUserForVersion(currentComposeTag?: string): Promise<GithubReleaseArtifactMetadata> {
+  async promptUserForVersion(repositoryDetails: GithubInfo, currentTag?: string): Promise<GithubReleaseArtifactMetadata> {
     // Get the latest releases
-    let lastReleasesMetadata = await this.GitHubReleases.grabLatestsReleasesMetadata();
+    let lastReleasesMetadata = await this.GitHubReleases.grabLatestsReleasesMetadata(repositoryDetails);
     // if the user already has an installed version, we remove it from the list
-    if (currentComposeTag) {
-      lastReleasesMetadata = lastReleasesMetadata.filter(release => release.tag.slice(1) !== currentComposeTag);
+    if (currentTag) {
+      lastReleasesMetadata = lastReleasesMetadata.filter(release => release.tag.slice(1) !== currentTag);
     }
 
     // Show the quickpick
@@ -98,12 +91,12 @@ export class Download {
     if (!tool || !tool.release) {
       return
     }
-    const toolArch = tool.archMap[arch() as keyof typeof tool.archMap ]
+    const toolArch = tool.archMap[arch() as keyof typeof tool.archMap]
     const toolAssetName = `${tool.name}-linux${tool.repo === 'compose' ? '-' : '_'}${toolArch}`
-    const assetId = await this.GitHubReleases.getReleaseAssetId(tool.release.id, toolAssetName, tool.extension);
-    
+    const assetId = await this.GitHubReleases.getReleaseAssetId(toolAssetName, tool.release.id, tool.extension, { owner: tool.owner, repo: tool.repo });
+
     const toolDownloadLocation = path.resolve(this.storageBinFolder, `${tool.name}${tool.extension}`);
-    
+
     // await promises.writeFile(path.resolve(this.storageBinFolder, `file_${tool.name}${Math.floor(Math.random() * 1000)}.txt`), '');
     // Download the asset and make it executable
     await this.GitHubReleases.downloadReleaseAsset(assetId, toolDownloadLocation);
@@ -117,7 +110,7 @@ export class Download {
   }
 
   async update(tool: ToolConfig): Promise<void> {
-    const latestRelease = await this.getLatestVersionAsset()
+    const latestRelease = await this.getLatestVersionAsset({ owner: tool.owner, repo: tool.repo })
     if (tool && tool.release) {
       if (tool.release.tag !== latestRelease.tag) {
         tool.release = latestRelease

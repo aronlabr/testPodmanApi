@@ -5,6 +5,11 @@ import type { Octokit } from '@octokit/rest';
 import { QuickPickItem } from '@podman-desktop/api';
 import { arch } from 'node:os';
 
+export interface GithubInfo {
+  owner: string;
+  repo: string;
+}
+
 export interface GithubReleaseArtifactMetadata extends QuickPickItem {
   tag: string;
   id: number;
@@ -27,12 +32,11 @@ export class GitHubReleases {
   
   // Provides last 5 majors releases from GitHub using the GitHub API
   // return name, tag and id of the release
-  async grabLatestsReleasesMetadata(): Promise<GithubReleaseArtifactMetadata[]> {
+  async grabLatestsReleasesMetadata(repositoryDetails: GithubInfo): Promise<GithubReleaseArtifactMetadata[]> {
     // Grab last 5 majors releases from GitHub using the GitHub API
 
     const lastReleases = await this.octokit.repos.listReleases({
-      owner: this._owner,
-      repo: this._repository,
+      ...repositoryDetails
     });
 
     // keep only releases and not pre-releases
@@ -52,10 +56,9 @@ export class GitHubReleases {
 
   // Get the asset id of a given release number for a given operating system and architecture
   // arch: x64, arm64 (see os.arch())
-  async getReleaseAssetId(releaseId: number, assetName: string, extension: string): Promise<number> {
+  async getReleaseAssetId(assetName: string, releaseId: number, extension: string, repositoryDetails: GithubInfo): Promise<number> {
     const listOfAssets = await this.octokit.repos.listReleaseAssets({
-      owner: this._owner,
-      repo: this._repository,
+      ...repositoryDetails,
       release_id: releaseId,
     });
 
