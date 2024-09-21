@@ -21,18 +21,6 @@ const extInfo: extensionApi.ProviderOptions = {
   emptyConnectionMarkdownDescription: extDescription
 }
 
-const nullTool: ToolConfig = {
-  name: '',
-  org: '',
-  repo: '',
-  extension: '',
-  archMap: {
-    x64: '',
-    arm64: '',
-  },
-  release: null
-}
-
 const wslTools: ToolConfig[] = [
   {
     name: 'docker-compose',
@@ -123,7 +111,6 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
           });
         })
       );
-      downloadManager.tool = nullTool
     },
   )
 
@@ -131,42 +118,25 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
     `${extInfo.id}.onboarding.downloadCommand`,
     async () => {
       let toolDownloaded: Boolean[] = [];
-      for (const tool of wslTools) {
-        downloadManager.tool = tool
-        if (!tool.release) {
-          tool.release = await downloadManager.getLatestVersionAsset();
-        }
-        let downloaded: Boolean = false
-        try {
-          await downloadManager.download(tool);
-          downloaded = true
-          toolDownloaded.push(downloaded);
-        } finally {
-          telemetryLogger?.logUsage(`${extInfo.id}.onboarding.downloadCommand`, {
-            successful: downloaded,
-            version: tool.release?.tag,
-          });
-        }
-      }
-      // await Promise.all(
-      //   wslTools.map(async tool => {
-      //     downloadManager.tool = tool
-
-      //     if (!tool.release) {
-      //       tool.release = await downloadManager.getLatestVersionAsset();
-      //       downloadManager.tool = tool
-      //     }
-      //     // try {
-      //     const downloaded: Boolean = await downloadManager.download();
-      //     toolDownloaded.push(downloaded);
-      //     // } finally {
-      //     //   telemetryLogger?.logUsage(`${extInfo.id}.onboarding.downloadCommand`, {
-      //     //     successful: downloaded,
-      //     //     version: tool.release?.tag,
-      //     //   });
-      //     // }
-      //   })
-      // )
+      await Promise.all(
+        wslTools.map(async tool => {
+          downloadManager.github = { owner: tool.org, repo: tool.repo }
+          if (!tool.release) {
+            tool.release = await downloadManager.getLatestVersionAsset();
+          }
+          let downloaded: Boolean = false
+          try {
+            await downloadManager.download(tool);
+            downloaded = true
+            toolDownloaded.push(downloaded);
+          } finally {
+            telemetryLogger?.logUsage(`${extInfo.id}.onboarding.downloadCommand`, {
+              successful: downloaded,
+              version: tool.release?.tag,
+            });
+          }
+        })
+      )
       const areDownloaded = toolDownloaded.every(v => v);
       extensionApi.context.setValue('binsAreDownloaded', areDownloaded, 'onboarding');
     }

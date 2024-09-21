@@ -12,13 +12,10 @@ export interface GithubReleaseArtifactMetadata extends QuickPickItem {
 
 // Allows to interact with Tool Releases on GitHub
 export class GitHubReleases {
-  private _owner: string;
-  private _repository: string;
+  private _owner: string = '';
+  private _repository: string = '';
 
-  constructor(private readonly octokit: Octokit) { 
-    this._owner = ''
-    this._repository = ''
-  }
+  constructor(private readonly octokit: Octokit) { }
 
   set owner(v: string) {
     this._owner = v;

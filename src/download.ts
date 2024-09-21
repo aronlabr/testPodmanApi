@@ -19,9 +19,15 @@ export interface ToolConfig {
   }
 }
 
+interface GithubData {
+  owner: string;
+  repo: string;
+}
+
 export class Download {
   private storageBinFolder: string = '';
   private _tool: ToolConfig | null = null;
+  // private _github: GithubData | null = null;
 
   constructor(
     private readonly extensionContext: extensionApi.ExtensionContext,
@@ -33,6 +39,15 @@ export class Download {
       this._tool = v;
       this.GitHubReleases.owner = this._tool.org
       this.GitHubReleases.repo = this._tool.repo
+    } else {
+      throw new Error("Invalid tool configuration");
+    }
+  }
+
+  set github (v: GithubData) {
+    if (v) {
+      this.GitHubReleases.owner = v.owner
+      this.GitHubReleases.repo = v.repo
     } else {
       throw new Error("Invalid tool configuration");
     }
@@ -73,7 +88,7 @@ export class Download {
   }
 
   async setup(): Promise<void> {
-    this.storageBinFolder = this.extensionContext.storagePath //path.join(this.extensionContext.storagePath, 'bin');
+    this.storageBinFolder = path.join(this.extensionContext.storagePath, 'bin');
     if (!existsSync(this.storageBinFolder)) {
       await promises.mkdir(this.storageBinFolder, { recursive: true });
     }
@@ -92,13 +107,13 @@ export class Download {
     // await promises.writeFile(path.resolve(this.storageBinFolder, `file_${tool.name}${Math.floor(Math.random() * 1000)}.txt`), '');
     // Download the asset and make it executable
     await this.GitHubReleases.downloadReleaseAsset(assetId, toolDownloadLocation);
-    // if (tool.name === 'docker-compose') {
-    //   await makeExecutable(toolDownloadLocation);
-    // }
-    // if (tool.repo === 'podman') {
-    //   await extract(this.storageBinFolder)
-    //   await promises.rename(path.resolve(this.storageBinFolder, toolAssetName), path.resolve(this.storageBinFolder, tool.name))
-    // }
+    if (tool.name === 'docker-compose') {
+      await makeExecutable(toolDownloadLocation);
+    }
+    if (tool.repo === 'podman') {
+      await extract(this.storageBinFolder)
+      await promises.rename(path.resolve(this.storageBinFolder, toolAssetName), path.resolve(this.storageBinFolder, tool.name))
+    }
   }
 
   async update(tool: ToolConfig): Promise<void> {
