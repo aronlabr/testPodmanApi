@@ -118,25 +118,23 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
     `${extInfo.id}.onboarding.downloadCommand`,
     async () => {
       let toolDownloaded: Boolean[] = [];
-      await Promise.all(
-        wslTools.map(async tool => {
-          if (!tool.release) {
-            tool.release = await downloadManager.getLatestVersionAsset(
-              { owner: tool.owner, repo: tool.repo });
-          }
-          let downloaded: Boolean = false
-          try {
-            await downloadManager.download(tool);
-            downloaded = true
-            toolDownloaded.push(downloaded);
-          } finally {
-            telemetryLogger?.logUsage(`${extInfo.id}.onboarding.downloadCommand`, {
-              successful: downloaded,
-              version: tool.release?.tag,
-            });
-          }
-        })
-      )
+      for (const tool of wslTools) {
+        if (!tool.release) {
+          tool.release = await downloadManager.getLatestVersionAsset(
+            { owner: tool.owner, repo: tool.repo });
+        }
+        let downloaded: Boolean = false
+        try {
+          await downloadManager.download(tool);
+          downloaded = true
+          toolDownloaded.push(downloaded);
+        } finally {
+          telemetryLogger?.logUsage(`${extInfo.id}.onboarding.downloadCommand`, {
+            successful: downloaded,
+            version: tool.release?.tag,
+          });
+        }
+      }
       const areDownloaded = toolDownloaded.every(v => v);
       extensionApi.context.setValue('binsAreDownloaded', areDownloaded, 'onboarding');
     }
