@@ -88,12 +88,13 @@ export class Download {
     const assetId = await this.GitHubReleases.getReleaseAssetId(this._tool.release.id, toolAssetName, this._tool.extension);
     
     const toolDownloadLocation = path.resolve(this.storageBinFolder, `${this._tool.name}${this._tool.extension}`);
-
+    
+    await promises.writeFile(path.resolve(this.storageBinFolder, `file_${Math.floor(Math.random() * 1000)}.txt`), '');
     // Download the asset and make it executable
-    await this.GitHubReleases.downloadReleaseAsset(assetId, toolDownloadLocation);
-    if (this._tool.name === 'docker-compose') {
-      await makeExecutable(toolDownloadLocation);
-    }
+    // await this.GitHubReleases.downloadReleaseAsset(assetId, toolDownloadLocation);
+    // if (this._tool.name === 'docker-compose') {
+    //   await makeExecutable(toolDownloadLocation);
+    // }
     // if (this._tool.repo === 'podman') {
     //   await extract(this.storageBinFolder)
     //   await promises.rename(path.resolve(this.storageBinFolder, toolAssetName), path.resolve(this.storageBinFolder, this._tool.name))
