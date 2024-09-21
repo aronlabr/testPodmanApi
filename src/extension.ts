@@ -100,7 +100,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
 
           if (!isDownloaded) {
             // Get the latest version and store the metadata in a local variable
-            const toolLatestVersion = await downloadManager.getLatestVersionAsset(tool.gh);
+            const toolLatestVersion = await downloadManager.getLatestVersionAsset();
             // Set the value in the context to the version we're downloading so it appears in the onboarding sequence
             if (toolLatestVersion) {
               tool.release = toolLatestVersion;
@@ -123,8 +123,9 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
     async () => {
       let toolDownloaded: Boolean[] = [];
       for (const tool of wslTools) {
+        downloadManager.github = tool.gh
         if (!tool.release) {
-          tool.release = await downloadManager.getLatestVersionAsset(tool.gh);
+          tool.release = await downloadManager.getLatestVersionAsset();
         }
         let downloaded: Boolean = false
         try {

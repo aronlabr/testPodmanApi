@@ -32,11 +32,12 @@ export class GitHubReleases {
   
   // Provides last 5 majors releases from GitHub using the GitHub API
   // return name, tag and id of the release
-  async grabLatestsReleasesMetadata(repositoryDetails: GithubInfo): Promise<GithubReleaseArtifactMetadata[]> {
+  async grabLatestsReleasesMetadata(): Promise<GithubReleaseArtifactMetadata[]> {
     // Grab last 5 majors releases from GitHub using the GitHub API
 
     const lastReleases = await this.octokit.repos.listReleases({
-      ...repositoryDetails
+      owner: this._owner,
+      repo: this._repository
     });
 
     // keep only releases and not pre-releases

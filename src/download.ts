@@ -49,21 +49,21 @@ export class Download {
 
   // Get the latest version of Compose from GitHub Releases
   // and return the artifact metadata
-  async getLatestVersionAsset(repositoryDetails: GithubInfo): Promise<GithubReleaseArtifactMetadata> {
-    const latestReleases = await this.GitHubReleases.grabLatestsReleasesMetadata(repositoryDetails);
+  async getLatestVersionAsset(): Promise<GithubReleaseArtifactMetadata> {
+    const latestReleases = await this.GitHubReleases.grabLatestsReleasesMetadata();
     return latestReleases[0];
   }
 
   // Get the latest versions of Compose from GitHub Releases
   // and return the artifacts metadata
-  async getLatestReleases(repositoryDetails: GithubInfo): Promise<GithubReleaseArtifactMetadata[]> {
-    return this.GitHubReleases.grabLatestsReleasesMetadata(repositoryDetails);
+  async getLatestReleases(): Promise<GithubReleaseArtifactMetadata[]> {
+    return this.GitHubReleases.grabLatestsReleasesMetadata();
   }
 
   // Create a "quickpick" prompt to ask the user which version of Compose they want to download
-  async promptUserForVersion(repositoryDetails: GithubInfo, currentTag?: string): Promise<GithubReleaseArtifactMetadata> {
+  async promptUserForVersion(currentTag?: string): Promise<GithubReleaseArtifactMetadata> {
     // Get the latest releases
-    let lastReleasesMetadata = await this.GitHubReleases.grabLatestsReleasesMetadata(repositoryDetails);
+    let lastReleasesMetadata = await this.GitHubReleases.grabLatestsReleasesMetadata();
     // if the user already has an installed version, we remove it from the list
     if (currentTag) {
       lastReleasesMetadata = lastReleasesMetadata.filter(release => release.tag.slice(1) !== currentTag);
@@ -111,7 +111,7 @@ export class Download {
   }
 
   async update(tool: ToolConfig): Promise<void> {
-    const latestRelease = await this.getLatestVersionAsset(tool.gh)
+    const latestRelease = await this.getLatestVersionAsset()
     if (tool && tool.release) {
       if (tool.release.tag !== latestRelease.tag) {
         tool.release = latestRelease
