@@ -7,8 +7,9 @@ import * as extensionApi from '@podman-desktop/api';
 import { GithubInfo, GithubReleaseArtifactMetadata, GitHubReleases } from './github-releases';
 import { extract, makeExecutable } from './cli-run';
 
-export interface ToolConfig extends GithubInfo {
+export interface ToolConfig {
   name: string;
+  gh: GithubInfo;
   extension: string;
   release: GithubReleaseArtifactMetadata | null;
   archMap: {
@@ -30,8 +31,8 @@ export class Download {
   set tool(v: ToolConfig) {
     if (v) {
       this._tool = v;
-      this.GitHubReleases.owner = this._tool.owner
-      this.GitHubReleases.repo = this._tool.repo
+      this.GitHubReleases.owner = this._tool.gh.owner
+      this.GitHubReleases.repo = this._tool.gh.repo
     } else {
       throw new Error("Invalid tool configuration");
     }
@@ -92,8 +93,8 @@ export class Download {
       return
     }
     const toolArch = tool.archMap[arch() as keyof typeof tool.archMap]
-    const toolAssetName = `${tool.name}-linux${tool.repo === 'compose' ? '-' : '_'}${toolArch}`
-    const assetId = await this.GitHubReleases.getReleaseAssetId(toolAssetName, tool.release.id, tool.extension, { owner: tool.owner, repo: tool.repo });
+    const toolAssetName = `${tool.name}-linux${tool.gh.repo === 'compose' ? '-' : '_'}${toolArch}`
+    const assetId = await this.GitHubReleases.getReleaseAssetId(toolAssetName, tool.release.id, tool.extension, tool.gh);
 
     const toolDownloadLocation = path.resolve(this.storageBinFolder, `${tool.name}${tool.extension}`);
 
@@ -103,14 +104,14 @@ export class Download {
     if (tool.name === 'docker-compose') {
       await makeExecutable(toolDownloadLocation);
     }
-    if (tool.repo === 'podman') {
+    if (tool.gh.repo === 'podman') {
       await extract(this.storageBinFolder)
       await promises.rename(path.resolve(this.storageBinFolder, toolAssetName), path.resolve(this.storageBinFolder, tool.name))
     }
   }
 
   async update(tool: ToolConfig): Promise<void> {
-    const latestRelease = await this.getLatestVersionAsset({ owner: tool.owner, repo: tool.repo })
+    const latestRelease = await this.getLatestVersionAsset(tool.gh)
     if (tool && tool.release) {
       if (tool.release.tag !== latestRelease.tag) {
         tool.release = latestRelease

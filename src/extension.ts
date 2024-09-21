@@ -24,8 +24,10 @@ const extInfo: extensionApi.ProviderOptions = {
 const wslTools: ToolConfig[] = [
   {
     name: 'docker-compose',
-    owner: 'docker',
-    repo: 'compose',
+    gh: {
+      owner: 'docker',
+      repo: 'compose',
+    },
     extension: '',
     archMap: {
       x64: 'x86_64',
@@ -35,8 +37,10 @@ const wslTools: ToolConfig[] = [
   },
   {
     name: 'podman-remote-static',
-    owner: 'containers',
-    repo: 'podman',
+    gh:{
+      owner: 'containers',
+      repo: 'podman',
+    },
     extension: '.tar.gz',
     archMap: {
       x64: 'amd64',
@@ -92,20 +96,20 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
         wslTools.map(async tool => {
           downloadManager.tool = tool
           const isDownloaded = downloadManager.checkDownloadedTool()
-          extensionApi.context.setValue(`${tool.repo}IsDownloaded`, isDownloaded, 'onboarding');
+          extensionApi.context.setValue(`${tool.gh.repo}IsDownloaded`, isDownloaded, 'onboarding');
 
           if (!isDownloaded) {
             // Get the latest version and store the metadata in a local variable
-            const toolLatestVersion = await downloadManager.getLatestVersionAsset({ owner: tool.owner, repo: tool.repo });
+            const toolLatestVersion = await downloadManager.getLatestVersionAsset(tool.gh);
             // Set the value in the context to the version we're downloading so it appears in the onboarding sequence
             if (toolLatestVersion) {
               tool.release = toolLatestVersion;
-              extensionApi.context.setValue(`${tool.repo}DownloadVersion`, tool.release.tag, 'onboarding');
+              extensionApi.context.setValue(`${tool.gh.repo}DownloadVersion`, tool.release.tag, 'onboarding');
             }
           }
           // Log if it's downloaded and what version is being selected for download (can be either latest, or chosen by user)
           telemetryLogger?.logUsage(`${extInfo.id}.onboarding.checkDownloadedCommand`, {
-            tool: tool.repo,
+            tool: tool.gh.repo,
             downloaded: isDownloaded,
             version: tool.release?.tag,
           });
@@ -120,8 +124,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
       let toolDownloaded: Boolean[] = [];
       for (const tool of wslTools) {
         if (!tool.release) {
-          tool.release = await downloadManager.getLatestVersionAsset(
-            { owner: tool.owner, repo: tool.repo });
+          tool.release = await downloadManager.getLatestVersionAsset(tool.gh);
         }
         let downloaded: Boolean = false
         try {
