@@ -133,14 +133,12 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
       let toolDownloaded: Boolean[] = [];
       for (const tool of wslTools) {
         downloadManager.tool = tool
-
         if (!tool.release) {
           tool.release = await downloadManager.getLatestVersionAsset();
-          downloadManager.tool = tool
         }
         let downloaded: Boolean = false
         try {
-          await downloadManager.download();
+          await downloadManager.download(tool);
           downloaded = true
           toolDownloaded.push(downloaded);
         } finally {

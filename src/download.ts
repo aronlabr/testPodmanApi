@@ -79,34 +79,34 @@ export class Download {
     }
   }
 
-  async download(): Promise<void> {
-    if (!this._tool || !this._tool.release) {
+  async download(tool: ToolConfig): Promise<void> {
+    if (!tool || !tool.release) {
       return
     }
-    const toolArch = this._tool.archMap[arch() as keyof typeof this._tool.archMap ]
-    const toolAssetName = `${this._tool.name}-linux${this._tool.repo === 'compose' ? '-' : '_'}${toolArch}`
-    const assetId = await this.GitHubReleases.getReleaseAssetId(this._tool.release.id, toolAssetName, this._tool.extension);
+    const toolArch = tool.archMap[arch() as keyof typeof tool.archMap ]
+    const toolAssetName = `${tool.name}-linux${tool.repo === 'compose' ? '-' : '_'}${toolArch}`
+    const assetId = await this.GitHubReleases.getReleaseAssetId(tool.release.id, toolAssetName, tool.extension);
     
-    const toolDownloadLocation = path.resolve(this.storageBinFolder, `${this._tool.name}${this._tool.extension}`);
+    const toolDownloadLocation = path.resolve(this.storageBinFolder, `${tool.name}${tool.extension}`);
     
-    await promises.writeFile(path.resolve(this.storageBinFolder, `file_${Math.floor(Math.random() * 1000)}.txt`), '');
+    await promises.writeFile(path.resolve(this.storageBinFolder, `file_${tool.name}${Math.floor(Math.random() * 1000)}.txt`), '');
     // Download the asset and make it executable
     // await this.GitHubReleases.downloadReleaseAsset(assetId, toolDownloadLocation);
-    // if (this._tool.name === 'docker-compose') {
+    // if (tool.name === 'docker-compose') {
     //   await makeExecutable(toolDownloadLocation);
     // }
-    // if (this._tool.repo === 'podman') {
+    // if (tool.repo === 'podman') {
     //   await extract(this.storageBinFolder)
-    //   await promises.rename(path.resolve(this.storageBinFolder, toolAssetName), path.resolve(this.storageBinFolder, this._tool.name))
+    //   await promises.rename(path.resolve(this.storageBinFolder, toolAssetName), path.resolve(this.storageBinFolder, tool.name))
     // }
   }
 
-  async update(): Promise<void> {
+  async update(tool: ToolConfig): Promise<void> {
     const latestRelease = await this.getLatestVersionAsset()
-    if (this._tool && this._tool.release) {
-      if (this._tool.release.tag !== latestRelease.tag) {
-        this._tool.release = latestRelease
-        await this.download()
+    if (tool && tool.release) {
+      if (tool.release.tag !== latestRelease.tag) {
+        tool.release = latestRelease
+        await this.download(tool)
       }
     }
   }
