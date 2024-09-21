@@ -89,9 +89,9 @@ export class Download {
     
     const toolDownloadLocation = path.resolve(this.storageBinFolder, `${tool.name}${tool.extension}`);
     
-    await promises.writeFile(path.resolve(this.storageBinFolder, `file_${tool.name}${Math.floor(Math.random() * 1000)}.txt`), '');
+    // await promises.writeFile(path.resolve(this.storageBinFolder, `file_${tool.name}${Math.floor(Math.random() * 1000)}.txt`), '');
     // Download the asset and make it executable
-    // await this.GitHubReleases.downloadReleaseAsset(assetId, toolDownloadLocation);
+    await this.GitHubReleases.downloadReleaseAsset(assetId, toolDownloadLocation);
     // if (tool.name === 'docker-compose') {
     //   await makeExecutable(toolDownloadLocation);
     // }
