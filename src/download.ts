@@ -19,14 +19,16 @@ export interface ToolConfig {
 }
 
 export class Download {
-  private storageBinFolder: string = '';
+  private storageBinFolder: string;
   private _tool: ToolConfig | null = null;
-  // private _github: GithubData | null = null;
+  // private _github: GithubInfo | null = null;
 
   constructor(
     private readonly extensionContext: extensionApi.ExtensionContext,
     private readonly GitHubReleases: GitHubReleases
-  ) { }
+  ) { 
+    this.storageBinFolder = path.join(this.extensionContext.storagePath, 'bin')
+  }
 
   set tool(v: ToolConfig) {
     if (v) {
@@ -82,7 +84,6 @@ export class Download {
   }
 
   async setup(): Promise<void> {
-    this.storageBinFolder = path.join(this.extensionContext.storagePath, 'bin');
     if (!existsSync(this.storageBinFolder)) {
       await promises.mkdir(this.storageBinFolder, { recursive: true });
     }
@@ -101,12 +102,12 @@ export class Download {
     // await promises.writeFile(path.resolve(this.storageBinFolder, `file_${tool.name}${Math.floor(Math.random() * 1000)}.txt`), '');
     // Download the asset and make it executable
     await this.GitHubReleases.downloadReleaseAsset(assetId, toolDownloadLocation);
-    if (tool.name === 'docker-compose') {
-      await makeExecutable(toolDownloadLocation);
-    }
-    if (tool.gh.repo === 'podman') {
-      await extract(this.storageBinFolder)
-      await promises.rename(path.resolve(this.storageBinFolder, toolAssetName), path.resolve(this.storageBinFolder, tool.name))
+    // if (tool.name === 'docker-compose') {
+    //   await makeExecutable(toolDownloadLocation);
+    // }
+    if (tool.name === 'podman-remote-static') {
+      await extract(toolDownloadLocation)
+      // await promises.rename(path.resolve(this.storageBinFolder, toolAssetName), path.resolve(this.storageBinFolder, tool.name))
     }
   }
 
