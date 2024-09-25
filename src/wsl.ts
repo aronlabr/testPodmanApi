@@ -12,15 +12,19 @@ export async function getDistros(): Promise<WSLInstance[]> {
 
   // Split the output into lines and parse each distro
   const lines = stdout.trim().split('\n');
+  // Remove header line
+  lines.shift();
 
   // Process each line and create JSON object for each WSL distro
-  // Skip the header line and map remaining lines
-  const distros: WSLInstance[] = lines.slice(1).map(line => {
+  const distros: WSLInstance[] = lines.map(line => {
     // Use regex to match the first column (name), second (state), and third (version)
     const matches = line.match(/^\s*\*?\s*([^\s]+)\s+([^\s]+)\s+([^\s]+)$/)
-    
-    const [_, name, state, version] = matches ? matches : ['','','',''];
-    return { name, state, version: parseInt(version) };
+    if (matches) {
+      const [_, name, state, version] = matches;
+      return { name, state, version: parseInt(version) };
+    } else {
+      throw new Error(`Invalid line format: ${line}`);
+    }
   });
 
   // Output the JSON
