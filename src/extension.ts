@@ -5,6 +5,7 @@ import * as extensionApi from '@podman-desktop/api';
 import { Download, ToolConfig } from './download';
 // import { Detect } from './detect';
 import { GitHubReleases } from './github-releases';
+import { getDistros } from './wsl';
 // import path from 'node:path';
 // import { existsSync, promises } from 'node:fs';
 // import { extract } from './cli-run';
@@ -50,15 +51,16 @@ const wslTools: ToolConfig[] = [
   },
 ]
 
-// const myFirstCommand = extensionApi.commands.registerCommand(`${extInfo.id}.hello`, async () => {
-//   // display a choice to the user for selecting some values
-//   const result = await extensionApi.window.showQuickPick(['un', 'deux', 'trois'], {
-//     canPickMany: true, // user can select more than one choice
-//   });
+const myFirstCommand = extensionApi.commands.registerCommand(`${extInfo.id}.hello`, async () => {
+  // display a choice to the user for selecting some values
+  const wslInstaces = (await getDistros()).map(instance => instance.name);
+  const result = await extensionApi.window.showQuickPick(wslInstaces, {
+    canPickMany: true, // user can select more than one choice
+  });
 
-//   // display an information message with the user choice
-//   await extensionApi.window.showInformationMessage(`The choice was: ${result}`);
-// });
+  // display an information message with the user choice
+  await extensionApi.window.showInformationMessage(`The choice was: ${result}`);
+});
 
 // // create an item in the status bar to run our command
 // // it will stick on the left of the status bar
@@ -144,6 +146,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
   extensionContext.subscriptions.push(
     checkDownload,
     execDownload,
+    myFirstCommand
   );
 
   // Push the new provider to Podman Desktop
