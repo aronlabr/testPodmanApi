@@ -17,7 +17,7 @@ export async function getDistros(): Promise<WSLInstance[]> {
 
   // Process each line and create JSON object for each WSL distro
   const distros: WSLInstance[] = lines.map(line => {
-    const [name, state, version] = line.trim().split(/\s+/);
+    const [name, state, version] = line.trim().split(/\s{2,}/);
     return { name, state, version: parseInt(version) };
   });
 
