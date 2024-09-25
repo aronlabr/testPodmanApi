@@ -26,7 +26,7 @@ export class Download {
   constructor(
     private readonly extensionContext: extensionApi.ExtensionContext,
     private readonly GitHubReleases: GitHubReleases
-  ) { 
+  ) {
     this.storageBinFolder = path.join(this.extensionContext.storagePath, 'bin')
   }
 
@@ -106,24 +106,13 @@ export class Download {
     //   await makeExecutable(toolDownloadLocation);
     // }
     if (tool.name === 'podman-remote-static') {
-      const oldPath = path.resolve(this.storageBinFolder, 'bin', toolAssetName);
-      const newPath = path.resolve(this.storageBinFolder, toolAssetName);
-      try {
-        await extract(toolDownloadLocation)
-        // Check if the source file exists before attempting to move it
-        await promises.access(oldPath);    
-        // Move and rename the file
-        await promises.rename(oldPath, newPath);
-        await promises.rm(path.resolve(this.storageBinFolder, 'bin'), { recursive: true, force: true })
-        console.log(`Successfully moved and renamed file to: ${newPath}`);
-      } catch (error: any) {
-        // Handle specific errors more gracefully
-        if (error.code === 'ENOENT') {
-          console.error(`Source file not found: ${oldPath}`);
-        } else {
-          console.error(`Error moving and renaming file:`, error);
-        }
-      }
+      await extract(toolDownloadLocation)
+      await promises.rename(
+        path.resolve(this.storageBinFolder, 'bin', toolAssetName),
+        path.resolve(this.storageBinFolder, tool.name)
+      );
+      await promises.rm(toolDownloadLocation)
+      await promises.rm(path.resolve(this.storageBinFolder, 'bin'), { recursive: true, force: true })
     }
   }
 

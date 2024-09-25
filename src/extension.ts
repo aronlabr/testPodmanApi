@@ -37,7 +37,7 @@ const wslTools: ToolConfig[] = [
   },
   {
     name: 'podman-remote-static',
-    gh:{
+    gh: {
       owner: 'containers',
       repo: 'podman',
     },

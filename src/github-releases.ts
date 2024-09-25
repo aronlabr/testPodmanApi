@@ -29,7 +29,7 @@ export class GitHubReleases {
   set repo(v: string) {
     this._repository = v;
   }
-  
+
   // Provides last 5 majors releases from GitHub using the GitHub API
   // return name, tag and id of the release
   async grabLatestsReleasesMetadata(): Promise<GithubReleaseArtifactMetadata[]> {
