@@ -18,15 +18,6 @@
       "enablement": "!wslite.binsAreInstalled",
       "steps": [
         {
-          "id": "setupBinFolder",
-          "label": "Create Storage folder",
-          "title": "Creating safe storage for binaries",
-          "command": "wslite.onboarding.setupBinFolder",
-          "completionEvents": [
-            "onCommand:wslite.onboarding.setupBinFolder"
-          ]
-        },
-        {
           "id": "checkDownloadedCommand",
           "label": "Check wslite",
           "title": "Checking for wslite installation",
@@ -70,9 +61,15 @@
           ]
         },
         {
+          "id": "downloadFailure",
+          "title": "Failed downloading Tools binaries",
+          "when": "!wslite.binsAreInstalled && !onboardingContext:binsAreDownloaded",
+          "state": "failed"
+        },
+        {
           "id": "downloadSuccessfulView",
           "title": "Binaries successfully Downloaded",
-          "when": "!wslite.binsAreInstalled && onboardingContext:binsAreDownloaded",
+          "when": "wslite.binsAreInstalled && onboardingContext:binsAreDownloaded",
           "state": "completed",
           "content": [
             [

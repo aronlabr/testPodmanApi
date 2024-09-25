@@ -83,12 +83,6 @@ export class Download {
     }
   }
 
-  async setup(): Promise<void> {
-    if (!existsSync(this.storageBinFolder)) {
-      await promises.mkdir(this.storageBinFolder, { recursive: true });
-    }
-  }
-
   async download(tool: ToolConfig): Promise<void> {
     if (!tool || !tool.release) {
       return

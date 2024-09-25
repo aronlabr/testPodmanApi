@@ -50,22 +50,22 @@ const wslTools: ToolConfig[] = [
   },
 ]
 
-const myFirstCommand = extensionApi.commands.registerCommand(`${extInfo.id}.hello`, async () => {
-  // display a choice to the user for selecting some values
-  const result = await extensionApi.window.showQuickPick(['un', 'deux', 'trois'], {
-    canPickMany: true, // user can select more than one choice
-  });
+// const myFirstCommand = extensionApi.commands.registerCommand(`${extInfo.id}.hello`, async () => {
+//   // display a choice to the user for selecting some values
+//   const result = await extensionApi.window.showQuickPick(['un', 'deux', 'trois'], {
+//     canPickMany: true, // user can select more than one choice
+//   });
 
-  // display an information message with the user choice
-  await extensionApi.window.showInformationMessage(`The choice was: ${result}`);
-});
+//   // display an information message with the user choice
+//   await extensionApi.window.showInformationMessage(`The choice was: ${result}`);
+// });
 
-// create an item in the status bar to run our command
-// it will stick on the left of the status bar
-const item = extensionApi.window.createStatusBarItem(extensionApi.StatusBarAlignLeft, 100);
-item.text = 'My first command';
-item.command = `${extInfo.id}.hello2`;
-item.show();
+// // create an item in the status bar to run our command
+// // it will stick on the left of the status bar
+// const item = extensionApi.window.createStatusBarItem(extensionApi.StatusBarAlignLeft, 100);
+// item.text = 'My first command';
+// item.command = `${extInfo.id}.hello2`;
+// item.show();
 
 // Telemetry
 let telemetryLogger: extensionApi.TelemetryLogger | undefined;
@@ -83,15 +83,9 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
   const releases = new GitHubReleases(octokit);
   const downloadManager = new Download(extensionContext, releases)
 
-  const setupBinFolder = extensionApi.commands.registerCommand(
-    `${extInfo.id}.onboarding.setupBinFolder`,
-    async () => await downloadManager.setup()
-  )
-
   const checkDownload = extensionApi.commands.registerCommand(
     `${extInfo.id}.onboarding.checkDownloadedCommand`,
     async () => {
-      // extensionApi.commands.executeCommand(`${extInfo.id}.onboarding.setupBinFolder`)
       await Promise.all(
         wslTools.map(async tool => {
           downloadManager.tool = tool
@@ -141,13 +135,13 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
       }
       const areDownloaded = toolDownloaded.every(v => v);
       extensionApi.context.setValue('binsAreDownloaded', areDownloaded, 'onboarding');
+      extensionApi.context.setValue('wslite.binsAreInstalled', areDownloaded);
     }
   )
 
   // const provider = extensionApi.provider.createProvider(extInfo);
 
   extensionContext.subscriptions.push(
-    setupBinFolder,
     checkDownload,
     execDownload,
   );
