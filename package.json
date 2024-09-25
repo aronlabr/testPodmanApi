@@ -12,7 +12,12 @@
   },
   "main": "./dist/extension.cjs",
   "contributes": {
-    "commands": [],
+    "commands": [
+      {
+        "command": "wslite.list",
+        "title": "WSL: Choose..."
+      }
+    ],
     "onboarding": {
       "title": "Extension Setup",
       "enablement": "!wslite.binsAreInstalled",

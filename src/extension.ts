@@ -52,7 +52,7 @@ const wslTools: ToolConfig[] = [
   },
 ]
 
-const myFirstCommand = extensionApi.commands.registerCommand(`${extInfo.id}.hello`, async () => {
+const myFirstCommand = extensionApi.commands.registerCommand(`${extInfo.id}.list`, async () => {
   // display a choice to the user for selecting some values
   const wslInstaces = (await getDistros()).map(instance => instance.name);
   const result = await extensionApi.window.showQuickPick(wslInstaces, {
