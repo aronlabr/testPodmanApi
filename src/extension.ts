@@ -6,6 +6,7 @@ import { Download, ToolConfig } from './download';
 // import { Detect } from './detect';
 import { GitHubReleases } from './github-releases';
 import { getDistros } from './wsl';
+import { checkBinInstalled } from './handler';
 // import path from 'node:path';
 // import { existsSync, promises } from 'node:fs';
 // import { extract } from './cli-run';
@@ -77,6 +78,7 @@ export function initTelemetryLogger(): void {
 }
 
 
+
 // Activate the extension asynchronously
 export async function activate(extensionContext: extensionApi.ExtensionContext): Promise<void> {
   initTelemetryLogger();
@@ -84,6 +86,8 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
   const octokit = new Octokit();
   const releases = new GitHubReleases(octokit);
   const downloadManager = new Download(extensionContext, releases)
+
+  await checkBinInstalled(extensionContext, wslTools)
 
   const checkDownload = extensionApi.commands.registerCommand(
     `${extInfo.id}.onboarding.checkDownloadedCommand`,
