@@ -12,7 +12,7 @@
   },
   "main": "./dist/extension.cjs",
   "contributes": {
-    "commands": [ ],
+    "commands": [],
     "onboarding": {
       "title": "Extension Setup",
       "enablement": "!wslite.binsAreInstalled",
@@ -96,6 +96,7 @@
     "@octokit/rest": "^21.0.2",
     "@podman-desktop/api": "^1.12.0",
     "@types/node": "^22.5.4",
+    "fast-extract": "^1.1.0",
     "shell-path": "^3.0.0",
     "typescript": "^5.5.4",
     "vite": "^5.4.3"
