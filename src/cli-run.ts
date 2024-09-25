@@ -2,6 +2,8 @@ import { promises } from 'node:fs';
 import * as path from 'node:path';
 
 import * as extensionApi from '@podman-desktop/api';
+import decompress from '@xhmikosr/decompress';
+import decompressTargz from '@xhmikosr/decompress-targz';
 
 const localBinDir = '~/.local/bin';
 
@@ -14,43 +16,54 @@ export async function makeExecutable(filePath: string): Promise<void> {
   await promises.chmod(filePath, 0o755);
 }
 
-async function moveFilesToParentDir(directory: string): Promise<void> {
-  // Read the directory contents
-  const files = await promises.readdir(directory);
-  Promise.all(
-    files.map(async file => {
+// async function moveFilesToParentDir(directory: string): Promise<void> {
+//   // Read the directory contents
+//   const files = await promises.readdir(directory);
+//   Promise.all(
+//     files.map(async file => {
 
-      const filePath = path.resolve(directory, file);
-      const stats = await promises.stat(filePath)
+//       const filePath = path.resolve(directory, file);
+//       const stats = await promises.stat(filePath)
 
-      if (stats.isDirectory()) {
-        await moveFilesToParentDir(filePath)
-        const subfiles = await promises.readdir(filePath)
-        if (subfiles.length === 0) {
-          // Deleted empty directory
-          await promises.rmdir(filePath)
-        }
-      } else {
-        const destPath = path.join(directory, '..', file);
-        await promises.rename(filePath, destPath)
-      }
-    })
-  )
-}
+//       if (stats.isDirectory()) {
+//         await moveFilesToParentDir(filePath)
+//         const subfiles = await promises.readdir(filePath)
+//         if (subfiles.length === 0) {
+//           // Deleted empty directory
+//           await promises.rmdir(filePath)
+//         }
+//       } else {
+//         const destPath = path.join(directory, '..', file);
+//         await promises.rename(filePath, destPath)
+//       }
+//     })
+//   )
+// }
 
-export async function extract(directory: string) {
-  const files = await promises.readdir(directory);
-  const tarsFiles = files.filter(file => file.endsWith('.tar.gz'));
+// export async function extract(directory: string) {
+//   const files = await promises.readdir(directory);
+//   const tarsFiles = files.filter(file => file.endsWith('.tar.gz'));
 
-  Promise.all(
-    tarsFiles.map( async tarPath => {
-      const { stderr } = await extensionApi.process.exec('tar', ['-xzf', tarPath])
-      if (stderr) {
-        console.error(`Error in output: ${stderr}`);
-        return;
-      }
-    })
-  );
+//   Promise.all(
+//     tarsFiles.map( async tarPath => {
+//       const { stderr } = await extensionApi.process.exec('tar', ['-xzf', tarPath])
+//       if (stderr) {
+//         console.error(`Error in output: ${stderr}`);
+//         return;
+//       }
+//     })
+//   );
 
-  await moveFilesToParentDir(directory)
+//   await moveFilesToParentDir(directory)
+// }
+
+export async function extract(filePath: string) {
+  const dist = path.dirname(filePath)
+  const files = await decompress(filePath, dist, {
+    // filter: file => file.path.endsWith('.txt'), // Example filter
+    plugins: [
+      decompressTargz() // Add the Targz plugin
+    ]
+  });
+  console.log('Decompressed files:', files);
 }

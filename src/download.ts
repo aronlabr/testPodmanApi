@@ -4,10 +4,8 @@ import * as path from 'node:path';
 
 import * as extensionApi from '@podman-desktop/api';
 
-import extract from 'fast-extract';
-
 import { GithubInfo, GithubReleaseArtifactMetadata, GitHubReleases } from './github-releases';
-import {makeExecutable } from './cli-run';
+import { extract } from './cli-run';
 
 export interface ToolConfig {
   name: string;
@@ -108,7 +106,7 @@ export class Download {
     //   await makeExecutable(toolDownloadLocation);
     // }
     if (tool.name === 'podman-remote-static') {
-      extract(toolDownloadLocation, this.storageBinFolder, { strip: 1 })
+      await extract(toolDownloadLocation)
       // await extract(toolDownloadLocation)
       // await promises.rename(path.resolve(this.storageBinFolder, toolAssetName), path.resolve(this.storageBinFolder, tool.name))
     }
