@@ -99,6 +99,7 @@ export class Download {
     // if (tool.name === 'docker-compose') {
     //   await makeExecutable(toolDownloadLocation);
     // }
+    console.log(this.storageBinFolder)
     if (tool.name === 'podman-remote-static') {
       await extract(toolDownloadLocation)
       await promises.rename(
