@@ -5,8 +5,9 @@ import * as extensionApi from '@podman-desktop/api';
 import { Download, ToolConfig } from './download';
 // import { Detect } from './detect';
 import { GitHubReleases } from './github-releases';
-import { getDistros } from './wsl';
+import { copyFileToInstace, getDistros } from './wsl';
 import { checkBinInstalled } from './handler';
+import path from 'node:path';
 // import path from 'node:path';
 // import { existsSync, promises } from 'node:fs';
 // import { extract } from './cli-run';
@@ -51,18 +52,6 @@ const wslTools: ToolConfig[] = [
     release: null,
   },
 ]
-
-const myFirstCommand = extensionApi.commands.registerCommand(`${extInfo.id}.list`, async () => {
-  // display a choice to the user for selecting some values
-  const wslInstaces = await getDistros();
-  const instancesNames = wslInstaces.map(instance => instance.name);
-  const result = await extensionApi.window.showQuickPick(instancesNames, {
-    canPickMany: true, // user can select more than one choice
-  });
-
-  // display an information message with the user choice
-  await extensionApi.window.showInformationMessage(`The choice was: ${result}`);
-});
 
 // // create an item in the status bar to run our command
 // // it will stick on the left of the status bar
@@ -146,12 +135,32 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
     }
   )
 
+  const cpBinsCommand = extensionApi.commands.registerCommand(`${extInfo.id}.list`, async () => {
+    // display a choice to the user for selecting some values
+    const wslInstaces = await getDistros();
+    const instancesNames = wslInstaces.map(instance => instance.name);
+    const result = await extensionApi.window.showQuickPick(instancesNames, {
+      canPickMany: true, // user can select more than one choice
+    });
+
+    if (!result) {
+      await extensionApi.window.showInformationMessage(`No result choosed`);
+      return
+    } 
+    const binStorage = path.join(extensionContext.storagePath, 'bin')
+    for (const instance of result) {
+      await copyFileToInstace(wslTools, instance, binStorage)
+    }
+    // display an information message with the user choice
+    await extensionApi.window.showInformationMessage(`The choice was: ${result}`);
+  });
+
   // const provider = extensionApi.provider.createProvider(extInfo);
 
   extensionContext.subscriptions.push(
     checkDownload,
     execDownload,
-    myFirstCommand
+    cpBinsCommand
   );
 
   // Push the new provider to Podman Desktop

@@ -36,10 +36,10 @@ export async function getDistros(): Promise<WSLInstance[]> {
   return distros
 }
 
-export async function copyFile(tools: ToolConfig[], wslIntance: string, binStroge: string) {
+export async function copyFileToInstace(tools: ToolConfig[], wslIntance: string, binStroge: string): Promise<void> {
   await Promise.all(
     tools.map( async tool => {
-      binStroge = binStroge.replace(/^([A-Za-z]):|\\/g, (_, driveLetter) => {
+      const wslFormattedPath = binStroge.replace(/^([A-Za-z]):|\\/g, (_, driveLetter) => {
         if (driveLetter) {
             return `/mnt/${driveLetter.toLowerCase()}`;  // Handle the drive letter
         }
@@ -47,7 +47,7 @@ export async function copyFile(tools: ToolConfig[], wslIntance: string, binStrog
       });
       let {stdout: wslUser} = await extensionApi.process.exec('wsl', ['-d', wslIntance, 'whoami'])
       wslUser = wslUser.replace(/\u0000/g, '').trim()
-      const cpCommand = ['cp', `${binStroge}/${tool.name}`, `/home/${wslUser}/.local`]
+      const cpCommand = ['cp', `${wslFormattedPath}/${tool.name}`, `/home/${wslUser}/.local`]
       const { stderr } = await extensionApi.process.exec('wsl', ['-d', wslIntance, ...cpCommand])
       if (stderr) {
         console.error(stderr)
