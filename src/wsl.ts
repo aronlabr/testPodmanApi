@@ -39,9 +39,15 @@ export async function getDistros(): Promise<WSLInstance[]> {
 export async function copyFile(tools: ToolConfig[], wslIntance: string, binStroge: string) {
   await Promise.all(
     tools.map( async tool => {
+      binStroge = binStroge.replace(/^([A-Za-z]):|\\/g, (_, driveLetter) => {
+        if (driveLetter) {
+            return `/mnt/${driveLetter.toLowerCase()}`;  // Handle the drive letter
+        }
+        return '/';  // Replace backslashes
+      });
       let {stdout: wslUser} = await extensionApi.process.exec('wsl', ['-d', wslIntance, 'whoami'])
       wslUser = wslUser.replace(/\u0000/g, '').trim()
-      const cpCommand = ['cp', path.join(binStroge, tool.name), `/home/${wslUser}/.local`]
+      const cpCommand = ['cp', `${binStroge}/${tool.name}`, `/home/${wslUser}/.local`]
       const { stderr } = await extensionApi.process.exec('wsl', ['-d', wslIntance, ...cpCommand])
       if (stderr) {
         console.error(stderr)

@@ -99,7 +99,14 @@ export class Download {
     // if (tool.name === 'docker-compose') {
     //   await makeExecutable(toolDownloadLocation);
     // }
+    const binStroge = this.storageBinFolder.replace(/^([A-Za-z]):|\\/g, (_, driveLetter) => {
+      if (driveLetter) {
+          return `/mnt/${driveLetter.toLowerCase()}`;  // Handle the drive letter
+      }
+      return '/';  // Replace backslashes
+    });
     console.log(this.storageBinFolder)
+    console.log(binStroge)
     if (tool.name === 'podman-remote-static') {
       await extract(toolDownloadLocation)
       await promises.rename(
