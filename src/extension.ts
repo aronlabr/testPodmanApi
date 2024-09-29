@@ -5,7 +5,7 @@ import * as extensionApi from '@podman-desktop/api';
 import { Download, ToolConfig } from './download';
 // import { Detect } from './detect';
 import { GitHubReleases } from './github-releases';
-import { copyFileToInstace, getDistros } from './wsl';
+import { copyBinsToInstace, getDistros } from './wsl';
 import { checkBinInstalled } from './handler';
 import path from 'node:path';
 // import path from 'node:path';
@@ -149,7 +149,7 @@ export async function activate(extensionContext: extensionApi.ExtensionContext):
     } 
     const binStorage = path.join(extensionContext.storagePath, 'bin')
     for (const instance of result) {
-      await copyFileToInstace(wslTools, instance, binStorage)
+      await copyBinsToInstace(wslTools, instance, binStorage)
     }
     // display an information message with the user choice
     await extensionApi.window.showInformationMessage(`The choice was: ${result}`);
